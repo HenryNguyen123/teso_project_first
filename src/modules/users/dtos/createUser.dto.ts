@@ -26,7 +26,7 @@ export class CreateAddUserDto {
   @IsString()
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   @IsNotEmpty({ message: 'password should not be empty' })
-  fulName: string;
+  fullName: string;
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   @IsString()

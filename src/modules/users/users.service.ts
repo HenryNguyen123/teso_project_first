@@ -22,8 +22,16 @@ export class UsersService {
       const email = body.email.trim();
       const userCode = 'user';
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      console.log(
+        'pass, email, fullname: ',
+        password,
+        ' ---- ',
+        email,
+        ' ------ ',
+        body.fullName,
+      );
       //step: validate
-      if (!email || !password || !body.fulName)
+      if (!email || !password || !body.fullName)
         return responseError('Missing required fields', 1000);
       if (password.length < 6)
         return responseError('Password must be at least 6 characters', 1001);
@@ -49,7 +57,7 @@ export class UsersService {
       const payload = {
         email: email,
         password: hash,
-        fullName: body.fulName,
+        fullName: body.fullName,
         dob: body.dob ? new Date(body.dob) : undefined,
         gender: body.gender ?? undefined,
         // role_id: role.id,
