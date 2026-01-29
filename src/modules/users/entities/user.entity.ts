@@ -20,11 +20,20 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ name: 'fullName', nullable: true })
+  @Column({ name: 'fullName' })
   fullName: string;
 
-  @Column({ name: 'role_id' })
-  roleId: number;
+  @Column({ name: 'avatar', nullable: true })
+  avatar: string;
+
+  @Column({ name: 'dob', nullable: true })
+  dob: Date;
+
+  @Column({ name: 'gender', nullable: true })
+  gender: string;
+
+  //   @Column({ name: 'role_id' })
+  //   roleId: number;
 
   @ManyToOne(() => Role, (role) => role.users, { eager: true })
   @JoinColumn({ name: 'role_id' })
