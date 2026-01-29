@@ -7,6 +7,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Role } from '../../role/entities/role.entity';
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -18,7 +20,7 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ name: 'full_name', nullable: true })
+  @Column({ name: 'fullName', nullable: true })
   fullName: string;
 
   @Column({ name: 'role_id' })
