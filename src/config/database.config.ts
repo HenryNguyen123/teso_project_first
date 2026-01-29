@@ -13,9 +13,22 @@ export const databaseProviders = [
         password: process.env.DB_PASS,
         database: process.env.DB_NAME,
         synchronize: true,
+        logging: true,
       });
 
-      return dataSource.initialize();
+      try {
+        await dataSource.initialize();
+        console.log('PostgreSQL connected successfully');
+
+        await dataSource.query('SELECT 1');
+        console.log('PostgreSQL query OK');
+
+        return dataSource;
+      } catch (error) {
+        console.error('PostgreSQL connection failed');
+        console.error(error);
+        throw error;
+      }
     },
   },
 ];
