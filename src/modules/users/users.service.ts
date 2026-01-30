@@ -6,6 +6,7 @@ import { responseError, responseSuccess } from 'src/shared/utils/response.util';
 import { Repository } from 'typeorm';
 import { hassPassword } from 'src/shared/utils/hashPassword.util';
 import { Role } from 'src/database/entities/role.entity';
+import { emailRegex } from 'src/shared/utils/regex.util';
 
 @Injectable()
 export class UsersService {
@@ -23,7 +24,6 @@ export class UsersService {
       const password = body.password.trim();
       const email = body.email.trim();
       const userCode = 'USER';
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       //step: validate
       if (!email || !password || !body.fullName)
         return responseError('Missing required fields', 1000);
