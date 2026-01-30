@@ -8,7 +8,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Role } from './role.entity';
-import { Exclude } from 'class-transformer';
+import { OneToMany } from 'typeorm';
+import { PasswordResetToken } from './password-reset-token.entity';
 
 @Entity('users')
 export class User {
@@ -18,8 +19,7 @@ export class User {
   @Column({ length: 500, unique: true })
   email: string;
 
-  @Exclude()
-  @Column({ select: false })
+  @Column()
   password: string;
 
   @Column({ name: 'full_name' })
@@ -43,4 +43,7 @@ export class User {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @OneToMany(() => PasswordResetToken, (token) => token.user)
+  resetTokens: PasswordResetToken[];
 }

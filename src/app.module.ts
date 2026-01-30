@@ -9,11 +9,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/database/entities/user.entity';
 import { Role } from 'src/database/entities/role.entity';
 import 'dotenv/config';
+import { AuthModule } from 'src/modules/auth/auth.module';
+import { AuthController } from 'src/modules/auth/auth.controller';
+import { Permission } from 'src/database/entities/permission.entity';
+import { RolePermission } from 'src/database/entities/rolePermission.entity';
+import { PasswordResetToken } from 'src/database/entities/password-reset-token.entity';
 
 @Module({
   imports: [
     UsersModule,
     RoleModule,
+    AuthModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
@@ -21,12 +27,12 @@ import 'dotenv/config';
       username: process.env.DB_USER,
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
-      entities: [User, Role],
+      entities: [User, Role, Permission, RolePermission, PasswordResetToken],
       synchronize: true,
       logging: false,
     }),
   ],
-  controllers: [AppController, UsersController, RoleController],
+  controllers: [AppController, UsersController, RoleController, AuthController],
   providers: [AppService],
 })
 export class AppModule {}
