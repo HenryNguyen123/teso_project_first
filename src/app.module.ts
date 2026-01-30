@@ -14,6 +14,10 @@ import { AuthController } from 'src/modules/auth/auth.controller';
 import { Permission } from 'src/database/entities/permission.entity';
 import { RolePermission } from 'src/database/entities/rolePermission.entity';
 import { PasswordResetToken } from 'src/database/entities/password-reset-token.entity';
+import { GiftsController } from 'src/modules/gifts/gifts.controller';
+import { AdminGiftsController } from 'src/modules/admin/gifts/gifts.controller';
+import { GiftsModule } from 'src/modules/gifts/gifts.module';
+import { AdminGiftsModule } from 'src/modules/admin/gifts/gifts.module';
 
 @Module({
   imports: [
@@ -31,8 +35,17 @@ import { PasswordResetToken } from 'src/database/entities/password-reset-token.e
       synchronize: true,
       logging: false,
     }),
+    GiftsModule,
+    AdminGiftsModule,
   ],
-  controllers: [AppController, UsersController, RoleController, AuthController],
+  controllers: [
+    AppController,
+    UsersController,
+    RoleController,
+    AuthController,
+    GiftsController,
+    AdminGiftsController,
+  ],
   providers: [AppService],
 })
 export class AppModule {}
