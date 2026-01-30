@@ -5,6 +5,8 @@ import { Role } from './entities/role.entity';
 import { Permission } from './entities/permission.entity';
 import { RolePermission } from './entities/rolePermission.entity';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
+import { UserGift } from 'src/database/entities/user-gift.entity';
+import { SystemGift } from 'src/database/entities/system-gift.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -14,7 +16,15 @@ export const AppDataSource = new DataSource({
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
 
-  entities: [User, Role, Permission, RolePermission, PasswordResetToken],
+  entities: [
+    User,
+    Role,
+    Permission,
+    RolePermission,
+    PasswordResetToken,
+    UserGift,
+    SystemGift,
+  ],
 
   migrations: ['dist/database/migrations/*.js'],
   synchronize: false,
