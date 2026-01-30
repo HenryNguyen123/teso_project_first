@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateAddUserDto } from 'src/modules/users/dtos/createUser.dto';
-import { User } from 'src/modules/users/entities/user.entity';
+import { User } from 'src/database/entities/user.entity';
 import { responseError, responseSuccess } from 'src/shared/utils/response.util';
 import { Repository } from 'typeorm';
 import { hassPassword } from 'src/shared/utils/hashPassword.util';
-import { Role } from 'src/modules/role/entities/role.entity';
+import { Role } from 'src/database/entities/role.entity';
 
 @Injectable()
 export class UsersService {
@@ -20,16 +20,8 @@ export class UsersService {
     try {
       const password = body.password.trim();
       const email = body.email.trim();
-      const userCode = 'user';
+      const userCode = 'USER';
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      console.log(
-        'pass, email, fullname: ',
-        password,
-        ' ---- ',
-        email,
-        ' ------ ',
-        body.fullName,
-      );
       //step: validate
       if (!email || !password || !body.fullName)
         return responseError('Missing required fields', 1000);
@@ -61,15 +53,15 @@ export class UsersService {
         dob: body.dob ? new Date(body.dob) : undefined,
         gender: body.gender ?? undefined,
         // role_id: role.id,
-        role: { id: role.id },
+        role: role,
         created_at: new Date(),
       };
       const user = this.usersRepository.create(payload);
       await this.usersRepository.save(user);
-      return responseSuccess('Create user successfully', 0, true);
+      return responseSuccess('Create user successfully', 0, user);
     } catch (error) {
       console.log('create user error:', error);
-      return responseError('get accout user fail', 1);
+      return responseError('get accout user fail', 1005);
     }
   }
 }

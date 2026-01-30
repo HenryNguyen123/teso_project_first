@@ -11,7 +11,6 @@ export class UsersController {
   @Post('create')
   async create(@Body() body: CreateAddUserDto): Promise<IResponse> {
     try {
-      console.log('body: ', body);
       const data = await this.userService.create(body);
       return data;
     } catch (error) {
