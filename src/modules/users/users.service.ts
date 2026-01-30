@@ -16,8 +16,10 @@ export class UsersService {
     private RoleRepository: Repository<Role>,
   ) {}
   //step 1: create user
-  async create(body: CreateAddUserDto) {
+  async create(body: CreateAddUserDto, file: Express.Multer.File) {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const avatar = file ? `/img/avatar/${file.filename}` : undefined;
       const password = body.password.trim();
       const email = body.email.trim();
       const userCode = 'USER';
@@ -48,20 +50,23 @@ export class UsersService {
       //step create user
       const payload = {
         email: email,
-        password: hash,
+        // password: hash,
         fullName: body.fullName,
         dob: body.dob ? new Date(body.dob) : undefined,
         gender: body.gender ?? undefined,
-        // role_id: role.id,
+        avatar,
         role: role,
         created_at: new Date(),
       };
-      const user = this.usersRepository.create(payload);
-      await this.usersRepository.save(user);
-      return responseSuccess('Create user successfully', 0, user);
+      const user = this.usersRepository.create({ ...payload, password: hash });
+      const checkCreateUser = await this.usersRepository.save(user);
+      if (checkCreateUser) {
+        return responseSuccess('Create user successfully', 0, payload);
+      }
+      return responseError('create user fail', 1005);
     } catch (error) {
       console.log('create user error:', error);
-      return responseError('get accout user fail', 1005);
+      return responseError('get accout user fail', 1006);
     }
   }
 }
