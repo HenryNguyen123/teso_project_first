@@ -80,6 +80,40 @@ export class InitTableDatabase1769766660427 implements MigrationInterface {
           ON DELETE CASCADE
       )
     `);
+
+    // system_gifts
+    await queryRunner.query(`
+      CREATE TABLE system_gifts (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        image VARCHAR(255),
+        quantity INT DEFAULT 0,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // user_gifts
+    await queryRunner.query(`
+      CREATE TABLE user_gifts (
+        id SERIAL PRIMARY KEY,
+        user_id INT NOT NULL,
+        gift_id INT NOT NULL,
+        received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+        CONSTRAINT fk_user_gifts_user
+          FOREIGN KEY (user_id)
+          REFERENCES users(id)
+          ON DELETE CASCADE,
+
+        CONSTRAINT fk_user_gifts_gift
+          FOREIGN KEY (gift_id)
+          REFERENCES system_gifts(id)
+          ON DELETE CASCADE
+      )
+    `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
@@ -88,5 +122,8 @@ export class InitTableDatabase1769766660427 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE IF EXISTS role_permissions`);
     await queryRunner.query(`DROP TABLE IF EXISTS permissions`);
     await queryRunner.query(`DROP TABLE IF EXISTS roles`);
+    await queryRunner.query(`DROP INDEX IF EXISTS uq_user_gift_unique`);
+    await queryRunner.query(`DROP TABLE IF EXISTS user_gifts`);
+    await queryRunner.query(`DROP TABLE IF EXISTS system_gifts`);
   }
 }

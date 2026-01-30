@@ -10,6 +10,7 @@ import {
 import { Role } from './role.entity';
 import { OneToMany } from 'typeorm';
 import { PasswordResetToken } from './password-reset-token.entity';
+import { UserGift } from 'src/database/entities/user-gift.entity';
 
 @Entity('users')
 export class User {
@@ -46,4 +47,7 @@ export class User {
 
   @OneToMany(() => PasswordResetToken, (token) => token.user)
   resetTokens: PasswordResetToken[];
+
+  @OneToMany(() => UserGift, (gift) => gift.user)
+  userGifts: UserGift[];
 }
