@@ -6,8 +6,8 @@ import { UsersModule } from './modules/users/users.module';
 import { RoleController } from './modules/role/role.controller';
 import { RoleModule } from './modules/role/role.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from 'src/modules/users/entities/user.entity';
-import { Role } from 'src/modules/role/entities/role.entity';
+import { User } from 'src/database/entities/user.entity';
+import { Role } from 'src/database/entities/role.entity';
 import 'dotenv/config';
 
 @Module({

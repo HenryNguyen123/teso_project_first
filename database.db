@@ -1,6 +1,7 @@
 CREATE TABLE roles (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    code VARCHAR(50) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -9,6 +10,9 @@ CREATE TABLE users (
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     fullName VARCHAR(255),
+    avatar VARCHAR(255),
+    dob date,
+    gender VARCHAR(10), --male / female / orther
     role_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -19,3 +23,10 @@ CREATE TABLE users (
         ON DELETE RESTRICT
         ON UPDATE CASCADE
 );
+INSERT INTO roles (name, code)
+VALUES
+  ('Administrator', 'ADMIN'),
+  ('User', 'USER');
+DROP TABLE roles;
+select * from roles
+select * from users

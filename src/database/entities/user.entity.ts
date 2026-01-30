@@ -7,9 +7,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Role } from '../../role/entities/role.entity';
+import { Role } from './role.entity';
+import { Exclude } from 'class-transformer';
 
-@Entity()
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -17,10 +18,11 @@ export class User {
   @Column({ length: 500, unique: true })
   email: string;
 
-  @Column()
+  @Exclude()
+  @Column({ select: false })
   password: string;
 
-  @Column({ name: 'fullName' })
+  @Column({ name: 'full_name' })
   fullName: string;
 
   @Column({ name: 'avatar', nullable: true })
@@ -31,9 +33,6 @@ export class User {
 
   @Column({ name: 'gender', nullable: true })
   gender: string;
-
-  //   @Column({ name: 'role_id' })
-  //   roleId: number;
 
   @ManyToOne(() => Role, (role) => role.users, { eager: true })
   @JoinColumn({ name: 'role_id' })
