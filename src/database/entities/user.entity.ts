@@ -20,7 +20,7 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ name: 'fullName' })
+  @Column({ name: 'full_name' })
   fullName: string;
 
   @Column({ name: 'avatar', nullable: true })
@@ -31,9 +31,6 @@ export class User {
 
   @Column({ name: 'gender', nullable: true })
   gender: string;
-
-  //   @Column({ name: 'role_id' })
-  //   roleId: number;
 
   @ManyToOne(() => Role, (role) => role.users, { eager: true })
   @JoinColumn({ name: 'role_id' })
