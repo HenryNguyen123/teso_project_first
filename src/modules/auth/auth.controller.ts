@@ -32,7 +32,7 @@ export class AuthController {
         maxAge: 30 * 60 * 1000,
         path: '/',
       });
-      res.cookie('RESET', data.resetToken, {
+      res.cookie('REFRESH', data.refreshToken, {
         httpOnly: true,
         secure: isProd,
         sameSite: isProd ? 'none' : 'lax',

@@ -27,7 +27,7 @@ interface IPayloadJWTLogin {
   roleCode: string;
   email: string;
 }
-interface IPayloadResstTokenLogin {
+interface IPayloadResetTokenLogin {
   user: object;
   token: string;
   expiresAt: Date;
@@ -41,18 +41,18 @@ export class AuthService {
     @InjectRepository(PasswordResetToken)
     private resetTokenRepository: Repository<PasswordResetToken>,
     private jwtService: JwtService,
-  ) {}
+  ) { }
   async login(body: LoginDto): Promise<{
     accessToken: string;
-    resetToken: string;
+    refreshToken: string;
     payload: any;
   }> {
     const pass: string = body.password?.trim();
     const email: string = body.email?.trim();
     const keyAccess = process.env.JWT_SECRET_KEY;
     const keyReset = process.env.JWT_RESET_KEY;
-    const timeExpire = '30m';
-    const timeExpireReset = '7d';
+    const timeExpire = process.env.TIME_EPIRE_TOKEN_ACCESS_LOGIN;
+    const timeExpireReset = process.env.TIME_EPIRE_TOKEN_REFRESH_PASSWORD;
     //step: validate input
     if (!pass || !email) {
       throw new BadRequestException('Email or password is required');
@@ -98,18 +98,18 @@ export class AuthService {
     // step: sign token
     const accessToken = await this.jwtService.signAsync(payloadJWT, {
       secret: keyAccess,
-      expiresIn: timeExpire,
+      expiresIn: Number(process.env.TIME_EPIRE_TOKEN_ACCESS_LOGIN),
     });
-    const resetToken = await this.jwtService.signAsync(payloadJWT, {
+    const refreshToken = await this.jwtService.signAsync(payloadJWT, {
       secret: keyReset,
-      expiresIn: timeExpireReset,
+      expiresIn: Number(process.env.TIME_EPIRE_TOKEN_REFRESH_PASSWORD),
     });
     //step: save reset Token
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
-    const payloadResstToken: IPayloadResstTokenLogin = {
+    const payloadResstToken: IPayloadResetTokenLogin = {
       user: user,
-      token: resetToken,
+      token: refreshToken,
       expiresAt: expiresAt,
       isUsed: false,
     };
@@ -117,7 +117,7 @@ export class AuthService {
       this.resetTokenRepository.create(payloadResstToken);
     await this.resetTokenRepository.save(resetTokenEntity);
     //step: output data
-    const data = { accessToken, resetToken, payload };
+    const data = { accessToken, refreshToken, payload };
     return data;
   }
 }
