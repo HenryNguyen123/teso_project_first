@@ -11,28 +11,8 @@ import { emailRegex } from 'src/shared/utils/regex.util';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { PasswordResetToken } from 'src/database/entities/password-reset-token.entity';
-interface IPayloadLogin {
-  email: string;
-  dob: Date;
-  fullName: string;
-  gender: string;
-  avatar: string;
-  role: {
-    name: string;
-    code: string;
-  };
-}
-interface IPayloadJWTLogin {
-  sub: number;
-  roleCode: string;
-  email: string;
-}
-interface IPayloadResetTokenLogin {
-  user: object;
-  token: string;
-  expiresAt: Date;
-  isUsed: boolean;
-}
+import { IPayloadJWTLogin, IPayloadLogin, IPayloadResetTokenLogin, IResponseLogin } from 'src/common/interfaces/login.interface';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -42,11 +22,7 @@ export class AuthService {
     private resetTokenRepository: Repository<PasswordResetToken>,
     private jwtService: JwtService,
   ) { }
-  async login(body: LoginDto): Promise<{
-    accessToken: string;
-    refreshToken: string;
-    payload: any;
-  }> {
+  async loginService(body: LoginDto): Promise<IResponseLogin> {
     const pass: string = body.password?.trim();
     const email: string = body.email?.trim();
     const keyAccess = process.env.JWT_SECRET_KEY;
@@ -119,5 +95,9 @@ export class AuthService {
     //step: output data
     const data = { accessToken, refreshToken, payload };
     return data;
+  }
+  // step: login
+  async login(body: LoginDto): Promise<IResponseLogin> {
+    return this.loginService(body);
   }
 }

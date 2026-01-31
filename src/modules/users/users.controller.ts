@@ -24,13 +24,11 @@ export class UsersController {
   @Post('create')
   @UseInterceptors(
     FileInterceptor('avatar', {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
       storage: diskStorage({
         destination: './public/img/avatar',
         filename: (req, file, cb) => {
           const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1e9);
 
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
           cb(null, uniqueName + extname(file.originalname));
         },
       }),

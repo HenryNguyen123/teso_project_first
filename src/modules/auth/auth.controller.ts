@@ -12,11 +12,14 @@ import { AuthService } from 'src/modules/auth/auth.service';
 import { LoginDto } from 'src/modules/auth/dtos/login.dto';
 import { responseSuccess } from 'src/shared/utils/response.util';
 import type { Response } from 'express';
+import { UseGuards } from '@nestjs/common';
+import { UserLoginGuard } from './guards/user-login.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
   @Post('login')
+  @UseGuards(UserLoginGuard)
   async login(
     @Body() body: LoginDto,
     @Res({ passthrough: true }) res: Response,
