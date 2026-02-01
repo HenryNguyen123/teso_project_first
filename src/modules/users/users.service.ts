@@ -128,7 +128,8 @@ export class UsersService {
           user.fullName = name;
         }
       }
-      if (body.dob !== undefined) {
+      if (body.dob || body.dob !== undefined) {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         const dob = new Date(`${body.dob}T00:00:00`);
         if (isNaN(dob.getTime())) {
           return responseError('Invalid dob format', 400);

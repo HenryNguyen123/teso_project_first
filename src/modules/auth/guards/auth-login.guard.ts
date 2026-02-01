@@ -1,20 +1,33 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  BadRequestException,
+} from '@nestjs/common';
+import type { Request } from 'express';
 import { emailRegex } from 'src/shared/utils/regex.util';
+
+interface LoginBody {
+  email?: string;
+  password?: string;
+}
 
 @Injectable()
 export class AuthLoginGuard implements CanActivate {
-  constructor() {}
   canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest();
-    const body = request.body;
-    const email = body.email;
-    const password = body.password;
+    const request = context.switchToHttp().getRequest<Request>();
+    const body = request.body as LoginBody;
+
+    const { email, password } = body;
+
     if (!email || !password) {
-      return false;
+      throw new BadRequestException('Email and password are required');
     }
+
     if (!emailRegex.test(email)) {
-      return false;
+      throw new BadRequestException('Invalid email format');
     }
+
     return true;
   }
 }

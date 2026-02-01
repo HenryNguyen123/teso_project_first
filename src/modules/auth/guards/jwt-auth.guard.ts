@@ -13,7 +13,7 @@ export class JwtAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext) {
     const req = context.switchToHttp().getRequest<Request>();
-    const token = req.cookies?.AUTH;
+    const token = req.cookies?.AUTH as string | undefined;
     if (!token) throw new UnauthorizedException('Token not found');
 
     const payload = await this.jwtService.verifyAsync<IPayloadLogin>(token, {

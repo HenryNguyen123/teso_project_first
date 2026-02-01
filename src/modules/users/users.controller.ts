@@ -1,19 +1,14 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Patch,
   Post,
-  Put,
   Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
 import { IResponse } from 'src/common/interfaces/response.interface';
 import { CreateAddUserDto } from 'src/modules/users/dtos/createUser.dto';
 import { UsersService } from 'src/modules/users/users.service';
@@ -42,15 +37,6 @@ export class UsersController {
       return responseError('Internal server error', -500);
     }
   }
-  //step 2: read user
-  @Get('read')
-  async read() {}
-  //step 3: update user
-  @Put('update')
-  async update() {}
-  //step 4: delete user
-  @Delete('destroy')
-  async destroy() {}
   //step 5: get me
   @Get('me')
   @UseGuards(JwtAuthGuard)
