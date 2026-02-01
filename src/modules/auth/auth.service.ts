@@ -12,6 +12,7 @@ import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { PasswordResetToken } from 'src/database/entities/password-reset-token.entity';
 import { IPayloadJWTLogin, IPayloadLogin, IPayloadResetTokenLogin, IResponseLogin } from 'src/common/interfaces/login.interface';
+import { RoleCode } from 'src/common/enums/role-code.enums';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +23,7 @@ export class AuthService {
     private resetTokenRepository: Repository<PasswordResetToken>,
     private jwtService: JwtService,
   ) { }
-  async loginService(body: LoginDto): Promise<IResponseLogin> {
+  async loginService(body: LoginDto, roleCode: string): Promise<IResponseLogin> {
     const pass: string = body.password?.trim();
     const email: string = body.email?.trim();
     const keyAccess = process.env.JWT_SECRET_KEY;
@@ -47,7 +48,11 @@ export class AuthService {
       },
     });
     if (!user) {
-      throw new UnauthorizedException('User does not exist');
+      throw new UnauthorizedException('account does not exist');
+    }
+    //step: check role
+    if (user.role.code !== RoleCode.USER) {
+      throw new UnauthorizedException('account does not have permission to login');
     }
     //step: check password
     const isValid = await comparePassword(pass, user.password);
@@ -97,7 +102,7 @@ export class AuthService {
     return data;
   }
   // step: login
-  async login(body: LoginDto): Promise<IResponseLogin> {
-    return this.loginService(body);
+  async login(body: LoginDto, roleCode: string): Promise<IResponseLogin> {
+    return this.loginService(body, roleCode);
   }
 }

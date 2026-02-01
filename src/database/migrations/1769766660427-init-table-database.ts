@@ -6,7 +6,7 @@ export class InitTableDatabase1769766660427 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // roles
     await queryRunner.query(`
-      CREATE TABLE roles (
+      CREATE TABLE IF NOT EXISTS roles (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         code VARCHAR(50) NOT NULL UNIQUE,
@@ -17,7 +17,7 @@ export class InitTableDatabase1769766660427 implements MigrationInterface {
 
     // permissions
     await queryRunner.query(`
-      CREATE TABLE permissions (
+      CREATE TABLE IF NOT EXISTS permissions (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         code VARCHAR(100) NOT NULL UNIQUE,
@@ -28,7 +28,7 @@ export class InitTableDatabase1769766660427 implements MigrationInterface {
 
     // role_permissions
     await queryRunner.query(`
-      CREATE TABLE role_permissions (
+      CREATE TABLE IF NOT EXISTS role_permissions (
         role_id INT NOT NULL,
         permission_id INT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -36,17 +36,19 @@ export class InitTableDatabase1769766660427 implements MigrationInterface {
         CONSTRAINT fk_rp_role
           FOREIGN KEY (role_id)
           REFERENCES roles(id)
-          ON DELETE CASCADE,
+          ON DELETE CASCADE
+          ON UPDATE CASCADE,
         CONSTRAINT fk_rp_permission
           FOREIGN KEY (permission_id)
           REFERENCES permissions(id)
           ON DELETE CASCADE
+          ON UPDATE CASCADE
       )
     `);
 
     // users
     await queryRunner.query(`
-      CREATE TABLE users (
+      CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         email VARCHAR(255) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
@@ -67,7 +69,7 @@ export class InitTableDatabase1769766660427 implements MigrationInterface {
 
     // password_reset_tokens
     await queryRunner.query(`
-      CREATE TABLE password_reset_tokens (
+      CREATE TABLE IF NOT EXISTS password_reset_tokens (
         id SERIAL PRIMARY KEY,
         user_id INT NOT NULL,
         token TEXT NOT NULL,
@@ -78,12 +80,13 @@ export class InitTableDatabase1769766660427 implements MigrationInterface {
           FOREIGN KEY (user_id)
           REFERENCES users(id)
           ON DELETE CASCADE
+          ON UPDATE CASCADE
       )
     `);
 
     // system_gifts
     await queryRunner.query(`
-      CREATE TABLE system_gifts (
+      CREATE TABLE IF NOT EXISTS system_gifts (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         description TEXT,
@@ -97,33 +100,33 @@ export class InitTableDatabase1769766660427 implements MigrationInterface {
 
     // user_gifts
     await queryRunner.query(`
-      CREATE TABLE user_gifts (
+      CREATE TABLE IF NOT EXISTS user_gifts (
         id SERIAL PRIMARY KEY,
         user_id INT NOT NULL,
         gift_id INT NOT NULL,
         received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
+        CONSTRAINT uq_user_gift UNIQUE (user_id, gift_id),
         CONSTRAINT fk_user_gifts_user
           FOREIGN KEY (user_id)
           REFERENCES users(id)
-          ON DELETE CASCADE,
-
+          ON DELETE CASCADE
+          ON UPDATE CASCADE,
         CONSTRAINT fk_user_gifts_gift
           FOREIGN KEY (gift_id)
           REFERENCES system_gifts(id)
           ON DELETE CASCADE
+          ON UPDATE CASCADE
       )
     `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`DROP TABLE IF EXISTS user_gifts`);
+    await queryRunner.query(`DROP TABLE IF EXISTS system_gifts`);
     await queryRunner.query(`DROP TABLE IF EXISTS password_reset_tokens`);
     await queryRunner.query(`DROP TABLE IF EXISTS users`);
     await queryRunner.query(`DROP TABLE IF EXISTS role_permissions`);
     await queryRunner.query(`DROP TABLE IF EXISTS permissions`);
     await queryRunner.query(`DROP TABLE IF EXISTS roles`);
-    await queryRunner.query(`DROP INDEX IF EXISTS uq_user_gift_unique`);
-    await queryRunner.query(`DROP TABLE IF EXISTS user_gifts`);
-    await queryRunner.query(`DROP TABLE IF EXISTS system_gifts`);
   }
 }

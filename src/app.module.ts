@@ -50,6 +50,7 @@ import { AuthService } from 'src/modules/auth/auth.service';
     }),
     GiftsModule,
     AdminGiftsModule,
+    TypeOrmModule.forFeature([User]),
     AdminAuthModule,
   ],
   controllers: [
