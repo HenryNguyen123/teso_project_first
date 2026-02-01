@@ -173,6 +173,11 @@ export class UsersService {
       const email = getUser.email;
       if (!emailRegex.test(email))
         return responseError('Invalid email format', 1002);
+      if (!body.oldPassword || !body.newPassword)
+        return responseError('Password is required', 1003);
+      if (body.oldPassword === body.newPassword)
+        return responseError('New password must be different from old password', 1011);
+      //step: check user
       const user = await this.usersRepository.findOne({
         where: {
           email: email,
