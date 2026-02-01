@@ -4,7 +4,10 @@ import { CreateAddUserDto } from 'src/modules/users/dtos/createUser.dto';
 import { User } from 'src/database/entities/user.entity';
 import { responseError, responseSuccess } from 'src/shared/utils/response.util';
 import { Repository } from 'typeorm';
-import { hassPassword } from 'src/shared/utils/hashPassword.util';
+import {
+  comparePassword,
+  hashPassword,
+} from 'src/shared/utils/hashPassword.util';
 import { Role } from 'src/database/entities/role.entity';
 import { emailRegex } from 'src/shared/utils/regex.util';
 import { Request } from 'express';
@@ -13,6 +16,7 @@ import { IPayloadLogin } from 'src/common/interfaces/login.interface';
 import { UpdateUserDto } from 'src/modules/users/dtos/updateUserDto.dto';
 import { avatarPath } from 'src/shared/utils/uploadAvatar.util';
 import { deleteFile } from 'src/shared/utils/deleteFile.util';
+import { ChangePasswordDto } from 'src/modules/users/dtos/changePasswordDto.dto';
 type GenderType = 'MALE' | 'FEMALE' | 'OTHER';
 
 @Injectable()
@@ -23,7 +27,7 @@ export class UsersService {
     private usersRepository: Repository<User>,
     @InjectRepository(Role)
     private RoleRepository: Repository<Role>,
-  ) { }
+  ) {}
   //step 1: create user
   async create(body: CreateAddUserDto, file: Express.Multer.File) {
     try {
@@ -46,7 +50,7 @@ export class UsersService {
       });
       if (checkEmail) return responseError('Email already exists', 1003);
       //step: hash password
-      const hash = await hassPassword(password);
+      const hash = await hashPassword(password);
       //step: check role
       const role = await this.RoleRepository.findOne({
         where: {
@@ -82,6 +86,8 @@ export class UsersService {
       const getUser = req.user as IPayloadLogin;
       if (!getUser) return responseError('User not found', 1007);
       const email = getUser.email;
+      if (!emailRegex.test(email))
+        return responseError('Invalid email format', 1002);
       const user = await this.usersRepository.findOne({
         where: {
           email: email,
@@ -100,11 +106,11 @@ export class UsersService {
   //step 6: update me
   async updateMe(req: Request, body: UpdateUserDto, file: Express.Multer.File) {
     try {
-      console.log('file:', file);
-      console.log('body:', body);
       const getUser = req.user as IPayloadLogin;
       if (!getUser) return responseError('User not found', 1007);
       const email = getUser.email;
+      if (!emailRegex.test(email))
+        return responseError('Invalid email format', 1002);
       const user = await this.usersRepository.findOne({
         where: {
           email: email,
@@ -153,6 +159,44 @@ export class UsersService {
     } catch (error) {
       console.log('update user error:', error);
       return responseError('update user fail', 1008);
+    }
+  }
+  //step 7: change password
+  async changePassword(req: Request, body: ChangePasswordDto) {
+    try {
+      //step: validate
+      const getUser = req.user as IPayloadLogin;
+      if (!getUser) return responseError('User not found', 1007);
+      const password = body.newPassword.trim();
+      if (password.length < 6)
+        return responseError('Password must be at least 6 characters', 1001);
+      const email = getUser.email;
+      if (!emailRegex.test(email))
+        return responseError('Invalid email format', 1002);
+      const user = await this.usersRepository.findOne({
+        where: {
+          email: email,
+        },
+        relations: {
+          role: true,
+        },
+      });
+      if (!user) return responseError('User not found', 1007);
+      //step: check old password
+      const checkPassword = await comparePassword(
+        body.oldPassword,
+        user.password,
+      );
+      if (!checkPassword)
+        return responseError('Old password is incorrect', 1010);
+      //step: hash new password
+      const hash = await hashPassword(password);
+      user.password = hash;
+      await this.usersRepository.save(user);
+      return responseSuccess('Change password successfully', 0, user);
+    } catch (error) {
+      console.log('change password error:', error);
+      return responseError('change password fail', 1009);
     }
   }
 }

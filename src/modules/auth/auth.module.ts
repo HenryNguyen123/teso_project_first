@@ -22,4 +22,4 @@ import { AuthLoginGuard } from 'src/modules/auth/guards/auth-login.guard';
   exports: [AuthService, AuthLoginGuard],
   providers: [AuthService, JwtService, AuthLoginGuard],
 })
-export class AuthModule { }
+export class AuthModule {}

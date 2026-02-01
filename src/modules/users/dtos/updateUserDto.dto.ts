@@ -8,7 +8,6 @@ import {
 } from 'class-validator';
 
 export class UpdateUserDto {
-
   @IsString()
   @IsNotEmpty({ message: 'fullName should not be empty' })
   fullName: string;

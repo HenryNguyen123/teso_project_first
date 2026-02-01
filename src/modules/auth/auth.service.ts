@@ -11,7 +11,12 @@ import { emailRegex } from 'src/shared/utils/regex.util';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { PasswordResetToken } from 'src/database/entities/password-reset-token.entity';
-import { IPayloadJWTLogin, IPayloadLogin, IPayloadResetTokenLogin, IResponseLogin } from 'src/common/interfaces/login.interface';
+import {
+  IPayloadJWTLogin,
+  IPayloadLogin,
+  IPayloadResetTokenLogin,
+  IResponseLogin,
+} from 'src/common/interfaces/login.interface';
 
 @Injectable()
 export class AuthService {
@@ -21,14 +26,15 @@ export class AuthService {
     @InjectRepository(PasswordResetToken)
     private resetTokenRepository: Repository<PasswordResetToken>,
     private jwtService: JwtService,
-  ) { }
-  async loginService(body: LoginDto, roleCode: string): Promise<IResponseLogin> {
+  ) {}
+  async loginService(
+    body: LoginDto,
+    roleCode: string,
+  ): Promise<IResponseLogin> {
     const pass: string = body.password?.trim();
     const email: string = body.email?.trim();
     const keyAccess = process.env.JWT_SECRET_KEY;
     const keyReset = process.env.JWT_RESET_KEY;
-    const timeExpire = process.env.TIME_EPIRE_TOKEN_ACCESS_LOGIN;
-    const timeExpireReset = process.env.TIME_EPIRE_TOKEN_REFRESH_PASSWORD;
     //step: validate input
     if (!pass || !email) {
       throw new BadRequestException('Email or password is required');
@@ -51,7 +57,9 @@ export class AuthService {
     }
     //step: check role
     if (user.role.code !== roleCode) {
-      throw new UnauthorizedException('account does not have permission to login');
+      throw new UnauthorizedException(
+        'account does not have permission to login',
+      );
     }
     //step: check password
     const isValid = await comparePassword(pass, user.password);

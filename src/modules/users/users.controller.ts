@@ -22,6 +22,7 @@ import type { Express, Request } from 'express';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { UpdateUserDto } from 'src/modules/users/dtos/updateUserDto.dto';
 import { AvatarUploadInterceptor } from 'src/modules/users/interceptors/avatarUpload.interceptor';
+import { ChangePasswordDto } from 'src/modules/users/dtos/changePasswordDto.dto';
 
 @Controller('users')
 export class UsersController {
@@ -66,9 +67,28 @@ export class UsersController {
   @Patch('me')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(AvatarUploadInterceptor)
-  async updateMe(@Req() req: Request, @Body() body: UpdateUserDto, @UploadedFile() file: Express.Multer.File) {
+  async updateMe(
+    @Req() req: Request,
+    @Body() body: UpdateUserDto,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<IResponse> {
     try {
       const data = await this.userService.updateMe(req, body, file);
+      return data;
+    } catch (error) {
+      console.log(error);
+      return responseError('Internal server error', -500);
+    }
+  }
+  //step : change password
+  @Patch('me/change-password')
+  @UseGuards(JwtAuthGuard)
+  async changePassword(
+    @Body() body: ChangePasswordDto,
+    @Req() req: Request,
+  ): Promise<IResponse> {
+    try {
+      const data = await this.userService.changePassword(req, body);
       return data;
     } catch (error) {
       console.log(error);
