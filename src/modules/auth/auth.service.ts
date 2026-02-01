@@ -40,12 +40,12 @@ export class AuthService {
       throw new Error('JWT_SECRET_KEY is not defined');
     }
     //step: check user exist
-    const user = await this.usersRepository.findOne({
-      where: { email: email },
-      relations: {
-        role: true,
-      },
-    });
+    const user = await this.usersRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .leftJoinAndSelect('user.role', 'role')
+      .where('user.email = :email', { email: email })
+      .getOne();
     if (!user) {
       throw new UnauthorizedException('account does not exist');
     }
