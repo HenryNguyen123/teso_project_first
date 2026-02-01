@@ -10,6 +10,10 @@ import { emailRegex } from 'src/shared/utils/regex.util';
 import { Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { IPayloadLogin } from 'src/common/interfaces/login.interface';
+import { UpdateUserDto } from 'src/modules/users/dtos/updateUserDto.dto';
+import { avatarPath } from 'src/shared/utils/uploadAvatar.util';
+import { deleteFile } from 'src/shared/utils/deleteFile.util';
+type GenderType = 'MALE' | 'FEMALE' | 'OTHER';
 
 @Injectable()
 export class UsersService {
@@ -23,7 +27,7 @@ export class UsersService {
   //step 1: create user
   async create(body: CreateAddUserDto, file: Express.Multer.File) {
     try {
-      const avatar = file ? `/img/avatar/${file.filename}` : undefined;
+      const avatar = file ? avatarPath(file) : undefined;
       const password = body.password.trim();
       const email = body.email.trim();
       const userCode = 'USER';
@@ -91,6 +95,64 @@ export class UsersService {
     } catch (error) {
       console.log('get user error:', error);
       return responseError('get user fail', 1008);
+    }
+  }
+  //step 6: update me
+  async updateMe(req: Request, body: UpdateUserDto, file: Express.Multer.File) {
+    try {
+      console.log('file:', file);
+      console.log('body:', body);
+      const getUser = req.user as IPayloadLogin;
+      if (!getUser) return responseError('User not found', 1007);
+      const email = getUser.email;
+      const user = await this.usersRepository.findOne({
+        where: {
+          email: email,
+        },
+        relations: {
+          role: true,
+        },
+      });
+      console.log('user:', user);
+      if (!user) return responseError('User not found', 1007);
+      // step:save update user
+      if (body.fullName !== undefined) {
+        const name = body.fullName.trim();
+        if (name.length > 0) {
+          user.fullName = name;
+        }
+      }
+      if (body.dob !== undefined) {
+        const dob = new Date(`${body.dob}T00:00:00`);
+        if (isNaN(dob.getTime())) {
+          return responseError('Invalid dob format', 400);
+        }
+        user.dob = dob;
+      }
+      if (body.gender !== undefined) {
+        user.gender = body.gender as GenderType;
+      }
+      //step: update avatar
+      if (file) {
+        if (user.avatar) {
+          deleteFile(user.avatar);
+        }
+        user.avatar = avatarPath(file);
+      }
+      console.log('user check 2:', user);
+      await this.usersRepository.save(user);
+      const updatedUser = await this.usersRepository.findOne({
+        where: {
+          email: email,
+        },
+        relations: {
+          role: true,
+        },
+      });
+      return responseSuccess('Update user successfully', 0, updatedUser);
+    } catch (error) {
+      console.log('update user error:', error);
+      return responseError('update user fail', 1008);
     }
   }
 }

@@ -7,15 +7,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-export class CreateAddUserDto {
-  @IsNotEmpty({ message: 'Email should not be empty' })
-  @IsEmail({}, { message: 'Invalid email address' })
-  email: string;
-
-  @IsString()
-  @IsNotEmpty({ message: 'password should not be empty' })
-  @MinLength(6)
-  password: string;
+export class UpdateUserDto {
 
   @IsString()
   @IsNotEmpty({ message: 'fullName should not be empty' })
