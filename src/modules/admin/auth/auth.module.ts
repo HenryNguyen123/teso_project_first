@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
-import { adminAuthService } from 'src/modules/admin/auth/auth.service';
+import { AdminAuthService } from 'src/modules/admin/auth/auth.service';
+import { AuthModule } from 'src/modules/auth/auth.module';
 
 @Module({
-  exports: [adminAuthService],
-  providers: [adminAuthService],
+  imports: [AuthModule],
+  exports: [AdminAuthService],
+  providers: [AdminAuthService],
 })
 export class AdminAuthModule {}
