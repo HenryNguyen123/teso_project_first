@@ -73,10 +73,10 @@ export class AuthService {
       fullName: user.fullName,
       gender: user.gender,
       avatar: user.avatar,
-      role: {
-        name: user.role.name,
-        code: user.role.code,
-      },
+      name: user.role.name,
+      code: user.role.code,
+      // role: {
+      // },
     };
     const payloadJWT: IPayloadJWTLogin = {
       sub: user.id,

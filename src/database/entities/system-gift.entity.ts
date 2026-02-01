@@ -25,7 +25,7 @@ export class SystemGift {
   @Column({ default: 0 })
   quantity: number;
 
-  @Column({ default: true })
+  @Column({ name: 'is_active', default: true, nullable: false })
   isActive: boolean;
 
   @CreateDateColumn()
@@ -34,6 +34,6 @@ export class SystemGift {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToMany(() => UserGift, (gift) => gift.user)
+  @OneToMany(() => UserGift, (userGift) => userGift.gift)
   userGifts: UserGift[];
 }

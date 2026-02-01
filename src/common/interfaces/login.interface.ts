@@ -4,10 +4,10 @@ export interface IPayloadLogin {
   fullName: string;
   gender: string;
   avatar: string;
-  role: {
-    name: string;
-    code: string;
-  };
+  name: string;
+  code: string;
+  // role: {
+  // };
 }
 export interface IPayloadJWTLogin {
   sub: number;

@@ -16,15 +16,15 @@ import { responseError } from 'src/shared/utils/response.util';
 import type { Express, Request } from 'express';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { UpdateUserDto } from 'src/modules/users/dtos/updateUserDto.dto';
-import { AvatarUploadInterceptor } from 'src/modules/users/interceptors/avatarUpload.interceptor';
 import { ChangePasswordDto } from 'src/modules/users/dtos/changePasswordDto.dto';
+import { UploadFileInterceptor } from 'src/common/interceptors/uploadFile.interceptor';
 
 @Controller('users')
 export class UsersController {
   constructor(private userService: UsersService) {}
   //step 1: create user
   @Post('create')
-  @UseInterceptors(AvatarUploadInterceptor)
+  @UseInterceptors(UploadFileInterceptor('avatar', './public/img/avatar'))
   async create(
     @Body() body: CreateAddUserDto,
     @UploadedFile() file: Express.Multer.File,
@@ -52,7 +52,7 @@ export class UsersController {
   //step 6: update me
   @Patch('me')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(AvatarUploadInterceptor)
+  @UseInterceptors(UploadFileInterceptor('avatar', './public/img/avatar'))
   async updateMe(
     @Req() req: Request,
     @Body() body: UpdateUserDto,
