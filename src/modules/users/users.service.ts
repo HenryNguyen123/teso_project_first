@@ -7,15 +7,19 @@ import { Repository } from 'typeorm';
 import { hassPassword } from 'src/shared/utils/hashPassword.util';
 import { Role } from 'src/database/entities/role.entity';
 import { emailRegex } from 'src/shared/utils/regex.util';
+import { Request } from 'express';
+import { JwtService } from '@nestjs/jwt';
+import { IPayloadLogin } from 'src/common/interfaces/login.interface';
 
 @Injectable()
 export class UsersService {
   constructor(
+    private jwtService: JwtService,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     @InjectRepository(Role)
     private RoleRepository: Repository<Role>,
-  ) {}
+  ) { }
   //step 1: create user
   async create(body: CreateAddUserDto, file: Express.Multer.File) {
     try {
@@ -66,6 +70,27 @@ export class UsersService {
     } catch (error) {
       console.log('create user error:', error);
       return responseError('get accout user fail', 1006);
+    }
+  }
+  // step 5: get me
+  async me(req: Request) {
+    try {
+      const getUser = req.user as IPayloadLogin;
+      if (!getUser) return responseError('User not found', 1007);
+      const email = getUser.email;
+      const user = await this.usersRepository.findOne({
+        where: {
+          email: email,
+        },
+        relations: {
+          role: true,
+        },
+      });
+      if (!user) return responseError('User not found', 1007);
+      return responseSuccess('Get user successfully', 0, user);
+    } catch (error) {
+      console.log('get user error:', error);
+      return responseError('get user fail', 1008);
     }
   }
 }

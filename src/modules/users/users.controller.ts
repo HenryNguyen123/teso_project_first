@@ -5,7 +5,9 @@ import {
   Get,
   Post,
   Put,
+  Req,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -15,7 +17,8 @@ import { IResponse } from 'src/common/interfaces/response.interface';
 import { CreateAddUserDto } from 'src/modules/users/dtos/createUser.dto';
 import { UsersService } from 'src/modules/users/users.service';
 import { responseError } from 'src/shared/utils/response.util';
-import type { Express } from 'express';
+import type { Express, Request } from 'express';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -61,4 +64,16 @@ export class UsersController {
   //step 4: delete user
   @Delete('destroy')
   async destroy() {}
+  //step 5: get me
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  async me(@Req() req: Request) {
+    try {
+      const data = await this.userService.me(req);
+      return data;
+    } catch (error) {
+      console.log(error);
+      return responseError('Internal server error', -500);
+    }
+  }
 }
