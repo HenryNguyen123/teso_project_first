@@ -176,16 +176,17 @@ export class UsersService {
       if (!body.oldPassword || !body.newPassword)
         return responseError('Password is required', 1003);
       if (body.oldPassword === body.newPassword)
-        return responseError('New password must be different from old password', 1011);
+        return responseError(
+          'New password must be different from old password',
+          1011,
+        );
       //step: check user
-      const user = await this.usersRepository.findOne({
-        where: {
-          email: email,
-        },
-        relations: {
-          role: true,
-        },
-      });
+      const user = await this.usersRepository
+        .createQueryBuilder('user')
+        .addSelect('user.password')
+        .leftJoinAndSelect('user.role', 'role')
+        .where('user.email = :email', { email: email })
+        .getOne();
       if (!user) return responseError('User not found', 1007);
       //step: check old password
       const checkPassword = await comparePassword(
@@ -198,7 +199,15 @@ export class UsersService {
       const hash = await hashPassword(password);
       user.password = hash;
       await this.usersRepository.save(user);
-      return responseSuccess('Change password successfully', 0, user);
+      const updateUser = await this.usersRepository.findOne({
+        where: {
+          email: email,
+        },
+        relations: {
+          role: true,
+        },
+      });
+      return responseSuccess('Change password successfully', 0, updateUser);
     } catch (error) {
       console.log('change password error:', error);
       return responseError('change password fail', 1009);
