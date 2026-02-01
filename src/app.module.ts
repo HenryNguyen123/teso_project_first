@@ -23,6 +23,7 @@ import { SystemGift } from 'src/database/entities/system-gift.entity';
 import { AdminAuthController } from 'src/modules/admin/auth/auth.controller';
 import { AdminAuthModule } from 'src/modules/admin/auth/auth.module';
 import { AuthService } from 'src/modules/auth/auth.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -50,7 +51,15 @@ import { AuthService } from 'src/modules/auth/auth.service';
     }),
     GiftsModule,
     AdminGiftsModule,
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([
+        User,
+        Role,
+        Permission,
+        RolePermission,
+        PasswordResetToken,
+        UserGift,
+        SystemGift,
+      ]),
     AdminAuthModule,
   ],
   controllers: [
@@ -62,6 +71,6 @@ import { AuthService } from 'src/modules/auth/auth.service';
     AdminGiftsController,
     AdminAuthController,
   ],
-  providers: [AppService, AuthService],
+  providers: [AppService, AuthService, JwtService],
 })
 export class AppModule {}
