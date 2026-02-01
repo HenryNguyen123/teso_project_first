@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Permission } from 'src/database/entities/permission.entity';
 import { RolePermission } from 'src/database/entities/rolePermission.entity';
 import { PasswordResetToken } from 'src/database/entities/password-reset-token.entity';
+import { AuthLoginGuard } from 'src/modules/auth/guards/auth-login.guard';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { PasswordResetToken } from 'src/database/entities/password-reset-token.e
       PasswordResetToken,
     ]),
   ],
-  exports: [AuthService],
-  providers: [AuthService, JwtService],
+  exports: [AuthService, AuthLoginGuard],
+  providers: [AuthService, JwtService, AuthLoginGuard],
 })
-export class AuthModule {}
+export class AuthModule { }

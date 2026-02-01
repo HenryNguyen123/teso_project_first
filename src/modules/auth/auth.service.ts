@@ -11,28 +11,8 @@ import { emailRegex } from 'src/shared/utils/regex.util';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { PasswordResetToken } from 'src/database/entities/password-reset-token.entity';
-interface IPayloadLogin {
-  email: string;
-  dob: Date;
-  fullName: string;
-  gender: string;
-  avatar: string;
-  role: {
-    name: string;
-    code: string;
-  };
-}
-interface IPayloadJWTLogin {
-  sub: number;
-  roleCode: string;
-  email: string;
-}
-interface IPayloadResstTokenLogin {
-  user: object;
-  token: string;
-  expiresAt: Date;
-  isUsed: boolean;
-}
+import { IPayloadJWTLogin, IPayloadLogin, IPayloadResetTokenLogin, IResponseLogin } from 'src/common/interfaces/login.interface';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -41,18 +21,14 @@ export class AuthService {
     @InjectRepository(PasswordResetToken)
     private resetTokenRepository: Repository<PasswordResetToken>,
     private jwtService: JwtService,
-  ) {}
-  async login(body: LoginDto): Promise<{
-    accessToken: string;
-    resetToken: string;
-    payload: any;
-  }> {
+  ) { }
+  async loginService(body: LoginDto, roleCode: string): Promise<IResponseLogin> {
     const pass: string = body.password?.trim();
     const email: string = body.email?.trim();
     const keyAccess = process.env.JWT_SECRET_KEY;
     const keyReset = process.env.JWT_RESET_KEY;
-    const timeExpire = '30m';
-    const timeExpireReset = '7d';
+    const timeExpire = process.env.TIME_EPIRE_TOKEN_ACCESS_LOGIN;
+    const timeExpireReset = process.env.TIME_EPIRE_TOKEN_REFRESH_PASSWORD;
     //step: validate input
     if (!pass || !email) {
       throw new BadRequestException('Email or password is required');
@@ -71,7 +47,11 @@ export class AuthService {
       },
     });
     if (!user) {
-      throw new UnauthorizedException('User does not exist');
+      throw new UnauthorizedException('account does not exist');
+    }
+    //step: check role
+    if (user.role.code !== roleCode) {
+      throw new UnauthorizedException('account does not have permission to login');
     }
     //step: check password
     const isValid = await comparePassword(pass, user.password);
@@ -98,18 +78,18 @@ export class AuthService {
     // step: sign token
     const accessToken = await this.jwtService.signAsync(payloadJWT, {
       secret: keyAccess,
-      expiresIn: timeExpire,
+      expiresIn: Number(process.env.TIME_EPIRE_TOKEN_ACCESS_LOGIN),
     });
-    const resetToken = await this.jwtService.signAsync(payloadJWT, {
+    const refreshToken = await this.jwtService.signAsync(payloadJWT, {
       secret: keyReset,
-      expiresIn: timeExpireReset,
+      expiresIn: Number(process.env.TIME_EPIRE_TOKEN_REFRESH_PASSWORD),
     });
     //step: save reset Token
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
-    const payloadResstToken: IPayloadResstTokenLogin = {
+    const payloadResstToken: IPayloadResetTokenLogin = {
       user: user,
-      token: resetToken,
+      token: refreshToken,
       expiresAt: expiresAt,
       isUsed: false,
     };
@@ -117,7 +97,11 @@ export class AuthService {
       this.resetTokenRepository.create(payloadResstToken);
     await this.resetTokenRepository.save(resetTokenEntity);
     //step: output data
-    const data = { accessToken, resetToken, payload };
+    const data = { accessToken, refreshToken, payload };
     return data;
+  }
+  // step: login
+  async login(body: LoginDto, roleCode: string): Promise<IResponseLogin> {
+    return this.loginService(body, roleCode);
   }
 }
