@@ -20,6 +20,9 @@ import { GiftsModule } from 'src/modules/gifts/gifts.module';
 import { AdminGiftsModule } from 'src/modules/admin/gifts/gifts.module';
 import { UserGift } from 'src/database/entities/user-gift.entity';
 import { SystemGift } from 'src/database/entities/system-gift.entity';
+import { AdminAuthController } from 'src/modules/admin/auth/auth.controller';
+import { AdminAuthModule } from 'src/modules/admin/auth/auth.module';
+import { AuthService } from 'src/modules/auth/auth.service';
 
 @Module({
   imports: [
@@ -33,13 +36,22 @@ import { SystemGift } from 'src/database/entities/system-gift.entity';
       username: process.env.DB_USER,
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
-      entities: [User, Role, Permission, RolePermission, PasswordResetToken, UserGift, SystemGift],
+      entities: [
+        User,
+        Role,
+        Permission,
+        RolePermission,
+        PasswordResetToken,
+        UserGift,
+        SystemGift,
+      ],
       synchronize: true,
       logging: false,
     }),
     GiftsModule,
     AdminGiftsModule,
     TypeOrmModule.forFeature([User]),
+    AdminAuthModule,
   ],
   controllers: [
     AppController,
@@ -48,7 +60,8 @@ import { SystemGift } from 'src/database/entities/system-gift.entity';
     AuthController,
     GiftsController,
     AdminGiftsController,
+    AdminAuthController,
   ],
-  providers: [AppService],
+  providers: [AppService, AuthService],
 })
 export class AppModule {}

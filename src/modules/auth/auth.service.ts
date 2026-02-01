@@ -12,6 +12,7 @@ import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { PasswordResetToken } from 'src/database/entities/password-reset-token.entity';
 import { IPayloadJWTLogin, IPayloadLogin, IPayloadResetTokenLogin, IResponseLogin } from 'src/common/interfaces/login.interface';
+import { RoleCode } from 'src/common/enums/role-code.enums';
 
 @Injectable()
 export class AuthService {
@@ -50,7 +51,7 @@ export class AuthService {
       throw new UnauthorizedException('account does not exist');
     }
     //step: check role
-    if (user.role.code !== roleCode) {
+    if (user.role.code !== RoleCode.USER) {
       throw new UnauthorizedException('account does not have permission to login');
     }
     //step: check password

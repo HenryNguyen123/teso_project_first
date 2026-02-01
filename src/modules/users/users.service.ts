@@ -19,7 +19,6 @@ export class UsersService {
   //step 1: create user
   async create(body: CreateAddUserDto, file: Express.Multer.File) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const avatar = file ? `/img/avatar/${file.filename}` : undefined;
       const password = body.password.trim();
       const email = body.email.trim();
