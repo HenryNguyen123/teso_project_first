@@ -6,7 +6,6 @@ import { responseError, responseSuccess } from 'src/shared/utils/response.util';
 import { SystemGift } from 'src/database/entities/system-gift.entity';
 import { UserGift } from 'src/database/entities/user-gift.entity';
 import { CreateGiftDto } from 'src/modules/admin/gifts/dtos/createGiftDto.dto';
-import { Request } from 'express';
 import { User } from 'src/database/entities/user.entity';
 import { deleteFile } from 'src/shared/utils/deleteFile.util';
 import { UpdateGiftStatusDto } from 'src/modules/admin/gifts/dtos/updateStatus.dto';
