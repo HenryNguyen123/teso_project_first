@@ -11,7 +11,6 @@ import {
 import { Role } from 'src/database/entities/role.entity';
 import { emailRegex } from 'src/shared/utils/regex.util';
 import { Request } from 'express';
-import { JwtService } from '@nestjs/jwt';
 import { IPayloadLogin } from 'src/common/interfaces/login.interface';
 import { UpdateUserDto } from 'src/modules/users/dtos/updateUserDto.dto';
 import { avatarPath } from 'src/shared/utils/uploadAvatar.util';
@@ -22,7 +21,6 @@ type GenderType = 'MALE' | 'FEMALE' | 'OTHER';
 @Injectable()
 export class UsersService {
   constructor(
-    private jwtService: JwtService,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     @InjectRepository(Role)

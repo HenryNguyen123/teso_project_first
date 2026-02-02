@@ -7,8 +7,10 @@ import { RolePermission } from './entities/rolePermission.entity';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
 import { UserGift } from 'src/database/entities/user-gift.entity';
 import { SystemGift } from 'src/database/entities/system-gift.entity';
+import { DataSourceOptions } from 'typeorm';
+import { SeederOptions } from 'typeorm-extension';
 
-export const AppDataSource = new DataSource({
+const dataSourceOptions: DataSourceOptions & SeederOptions = {
   type: 'postgres',
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT),
@@ -29,4 +31,9 @@ export const AppDataSource = new DataSource({
   migrations: ['dist/database/migrations/*.js'],
   synchronize: false,
   logging: false,
-});
+
+  seeds: ['dist/database/seeds/*.js'],
+  factories: ['dist/database/factories/*.js'],
+};
+
+export const AppDataSource = new DataSource(dataSourceOptions);
