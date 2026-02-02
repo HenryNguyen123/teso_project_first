@@ -99,7 +99,7 @@ export class AdminGiftsService {
       if (Number(body.quantity) < 0)
         return responseError('Quantity must be >= 0', 1002);
       if (file) {
-        image = file.filename;
+        image = `/img/gifts/${file.filename}`;
       }
       //step: create gift
       const payload = {
@@ -126,12 +126,10 @@ export class AdminGiftsService {
     try {
       let image: string | undefined;
       //step: validate
-      if (!body.name?.trim())
-        return responseError('Gift name is required', 1001);
       if (body.quantity !== undefined && Number(body.quantity) < 0)
         return responseError('Quantity must be >= 0', 1002);
       if (file) {
-        image = file.filename;
+        image = `/img/gifts/${file.filename}`;
       }
       //step: create user gift
       const systemGift = await this.giftRepository.findOne({

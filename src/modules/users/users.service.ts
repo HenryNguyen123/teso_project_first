@@ -65,7 +65,7 @@ export class UsersService {
         fullName: body.fullName,
         dob: body.dob ? new Date(body.dob) : undefined,
         gender: body.gender ?? undefined,
-        avatar,
+        avatar: avatar ? `/img/avatar/${avatar}` : undefined,
         role: role,
         created_at: new Date(),
       };
@@ -119,7 +119,6 @@ export class UsersService {
           role: true,
         },
       });
-      console.log('user:', user);
       if (!user) return responseError('User not found', 1007);
       // step:save update user
       if (body.fullName !== undefined) {
@@ -146,7 +145,6 @@ export class UsersService {
         }
         user.avatar = avatarPath(file);
       }
-      console.log('user check 2:', user);
       await this.usersRepository.save(user);
       const updatedUser = await this.usersRepository.findOne({
         where: {
