@@ -137,6 +137,41 @@ VALUES
   'female',
   1
 );
+
+INSERT INTO system_gifts (name, description, image, quantity, is_active) VALUES
+('Gift Card 50K', 'Gift card trị giá 50.000đ', 'gift_50k.png', 100, true),
+('Gift Card 100K', 'Gift card trị giá 100.000đ', 'gift_100k.png', 100, true),
+('Gift Card 200K', 'Gift card trị giá 200.000đ', 'gift_200k.png', 50, true),
+('Voucher Coffee', 'Voucher cà phê miễn phí', 'coffee.png', 80, true),
+('Voucher Trà Sữa', 'Voucher trà sữa size L', 'milktea.png', 60, true),
+('Áo Thun TESO', 'Áo thun thương hiệu TESO', 'tshirt.png', 40, true),
+('Mũ Lưỡi Trai', 'Mũ lưỡi trai thời trang', 'cap.png', 30, true),
+('Bình Giữ Nhiệt', 'Bình giữ nhiệt inox', 'bottle.png', 25, true),
+('Sổ Tay', 'Sổ tay ghi chép cao cấp', 'notebook.png', 70, true),
+('Bút Kim Loại', 'Bút kim loại khắc logo', 'pen.png', 90, true),
+('Tai Nghe Bluetooth', 'Tai nghe bluetooth không dây', 'earbuds.png', 20, true),
+('Chuột Không Dây', 'Chuột không dây tiện lợi', 'mouse.png', 35, true),
+('Bàn Phím Mini', 'Bàn phím mini gọn nhẹ', 'keyboard.png', 15, true),
+('USB 32GB', 'USB dung lượng 32GB', 'usb.png', 50, true),
+('Sạc Dự Phòng', 'Pin sạc dự phòng 10.000mAh', 'powerbank.png', 18, true),
+('Loa Bluetooth', 'Loa bluetooth mini', 'speaker.png', 22, true),
+('Áo Khoác', 'Áo khoác gió TESO', 'jacket.png', 10, true),
+('Voucher Mua Sắm', 'Voucher mua sắm 300K', 'shopping.png', 12, true),
+('Thẻ Game', 'Thẻ game online', 'gamecard.png', 40, true),
+('Gift Mystery Box', 'Hộp quà bí ẩn', 'mystery.png', 5, false);
+INSERT INTO user_gifts (user_id, gift_id) VALUES
+(1, 1),
+(1, 2),
+(1, 5),
+(1, 10),
+(1, 15),
+
+(2, 3),
+(2, 4),
+(2, 6),
+(2, 8),
+(2, 12);
+
 DROP TABLE roles cascade;
 select * from roles
 select * from users

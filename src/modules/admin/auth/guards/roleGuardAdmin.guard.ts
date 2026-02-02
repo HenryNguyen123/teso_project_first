@@ -23,8 +23,8 @@ export class RoleAdminGuard extends AuthGuard('jwt') {
       secret: process.env.JWT_SECRET_KEY,
     });
     if (!payload) throw new UnauthorizedException('Token jwt not found');
-    const roleCode = String(payload.roleCode);
-    if (roleCode !== RoleCode.ADMIN)
+    const roleCode = payload.roleCode as RoleCode;
+    if (!payload.roleCode || roleCode !== RoleCode.ADMIN)
       throw new UnauthorizedException('nember dont have permission');
     req['user'] = payload;
     return true;
