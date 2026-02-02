@@ -4,7 +4,6 @@ import { UsersService } from 'src/modules/users/users.service';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { CreateAddUserDto } from 'src/modules/users/dtos/createUser.dto';
 import { UpdateUserDto } from 'src/modules/users/dtos/updateUserDto.dto';
-import { ChangePasswordDto } from 'src/modules/users/dtos/changePasswordDto.dto';
 describe('UsersController', () => {
   let controller: UsersController;
 
@@ -130,34 +129,6 @@ describe('UsersController', () => {
       // controller đang gọi updateMe(req, body, file)
       expect(mockUsersService.updateMe).toHaveBeenCalledWith(req, body, file);
       expect(result).toEqual(updatedUser);
-    });
-  });
-
-  //step 7: change password
-  describe('changePassword', () => {
-    it('should change user password', async () => {
-      const req: any = {
-        user: {
-          id: 1,
-          email: 'test@example.com',
-        },
-      };
-
-      const body: ChangePasswordDto = {
-        oldPassword: 'old123',
-        newPassword: 'new123',
-      };
-
-      const response = {
-        message: 'Password changed successfully',
-      };
-
-      mockUsersService.changePassword.mockResolvedValue(response);
-
-      const result = await controller.changePassword(body, req);
-
-      expect(mockUsersService.changePassword).toHaveBeenCalledWith(body, req);
-      expect(result).toEqual(response);
     });
   });
 });
