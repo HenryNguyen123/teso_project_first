@@ -8,9 +8,8 @@ import { UserGift } from 'src/database/entities/user-gift.entity';
 import { CreateGiftDto } from 'src/modules/admin/gifts/dtos/createGiftDto.dto';
 import { Request } from 'express';
 import { User } from 'src/database/entities/user.entity';
-import { IPayloadLogin } from 'src/common/interfaces/login.interface';
-import { IJwtPayload } from 'src/common/interfaces/jwt.interface';
 import { deleteFile } from 'src/shared/utils/deleteFile.util';
+import { UpdateGiftStatusDto } from 'src/modules/admin/gifts/dtos/updateStatus.dto';
 
 @Injectable()
 export class AdminGiftsService {
@@ -46,15 +45,14 @@ export class AdminGiftsService {
         take: limit,
         skip: (page - 1) * limit,
       });
-      //step: check if gifts is empty
-      if (allGifts.length === 0)
-        return responseError('get all gifts fail', 1009);
+      //step: pagination
       const payload = {
         data: allGifts,
         meta: {
           page,
           limit,
-          totalItems: Math.ceil(total / limit),
+          totalItems: total,
+          totalPages: Math.ceil(total / limit),
         },
       };
       return responseSuccess('get all gifts successfully', 0, payload);
@@ -92,11 +90,7 @@ export class AdminGiftsService {
     }
   }
   //step: create gift
-  async createGift(
-    body: CreateGiftDto,
-    file: Express.Multer.File,
-    req: Request,
-  ) {
+  async createGift(body: CreateGiftDto, file: Express.Multer.File) {
     try {
       let image: string | undefined;
       //step: validate
@@ -107,22 +101,6 @@ export class AdminGiftsService {
       if (file) {
         image = file.filename;
       }
-      //step: get admin
-      const getAdmin = req.user as IPayloadLogin;
-      if (!getAdmin) return responseError('admin not found', 1012);
-      //step: check admin
-      const email = getAdmin.email as string | undefined;
-      if (!email) return responseError('admin not found', 1012);
-      const admin = await this.adminRepository.findOne({
-        where: {
-          email: email,
-        },
-      });
-      if (!admin) return responseError('admin not found', 1012);
-      //step: create user gift
-      const userGift = this.userGiftRepository.create({
-        user: admin,
-      });
       //step: create gift
       const payload = {
         name: body.name,
@@ -130,7 +108,6 @@ export class AdminGiftsService {
         image: image,
         quantity: Number(body.quantity),
         isActive: Boolean(body.isActive),
-        userGifts: [userGift],
       };
       const gift = await this.giftRepository.save(payload);
       if (!gift) return responseError('create gift fail', 1011);
@@ -145,7 +122,6 @@ export class AdminGiftsService {
     id: number,
     body: CreateGiftDto,
     file: Express.Multer.File,
-    req: Request,
   ) {
     try {
       let image: string | undefined;
@@ -157,18 +133,6 @@ export class AdminGiftsService {
       if (file) {
         image = file.filename;
       }
-      //step: get admin
-      const getAdmin = req.user as IJwtPayload;
-      if (!getAdmin) return responseError('admin not found', 1012);
-      //step: check admin
-      const email = getAdmin.email as string | undefined;
-      if (!email) return responseError('admin not found', 1012);
-      const admin = await this.adminRepository.findOne({
-        where: {
-          email: email,
-        },
-      });
-      if (!admin) return responseError('admin not found', 1012);
       //step: create user gift
       const systemGift = await this.giftRepository.findOne({
         where: {
@@ -176,9 +140,6 @@ export class AdminGiftsService {
         },
       });
       if (!systemGift) return responseError('gift not found', 1013);
-      const userGift = this.userGiftRepository.create({
-        user: admin,
-      });
       //step: remove old image
       if (file && systemGift.image) {
         deleteFile(systemGift.image);
@@ -188,9 +149,12 @@ export class AdminGiftsService {
         name: body.name ?? systemGift.name,
         description: body.description ?? systemGift.description,
         image: image ?? systemGift.image,
-        quantity: body.quantity ? Number(body.quantity) : systemGift.quantity,
-        isActive: body.isActive ? Boolean(body.isActive) : systemGift.isActive,
-        userGifts: [userGift],
+        quantity:
+          body.quantity !== undefined
+            ? Number(body.quantity)
+            : systemGift.quantity,
+        isActive:
+          body.isActive !== undefined ? body.isActive : systemGift.isActive,
       };
       const gift = await this.giftRepository.save({
         ...systemGift,
@@ -204,48 +168,44 @@ export class AdminGiftsService {
     }
   }
   //step: update status gift
-  async updateStatusGift(
-    id: number,
-    body: { isActive: boolean },
-    req: Request,
-  ) {
+  async updateStatusGift(id: number, body: UpdateGiftStatusDto) {
     try {
       //step: validate
-      if (body.isActive === undefined)
+      if (!body || body.isActive === undefined)
         return responseError('Status is required', 1001);
-      //step: get admin
-      const payload = req.user as IJwtPayload;
-      if (!payload?.email) return responseError('admin not found', 1012);
-      const admin = await this.adminRepository.findOne({
-        where: { email: payload.email },
-      });
-      if (!admin) return responseError('admin not found', 1012);
+      const isActive = body.isActive as boolean | string;
+      if (isActive === 'true') body.isActive = true;
+      if (isActive === 'false') body.isActive = false;
       //step: update gift
       const result = await this.giftRepository.update(id, {
         isActive: body.isActive,
       });
       if (!result.affected) return responseError('gift not found', 1013);
-      return responseSuccess('update status gift successfully', 0, result);
+      //step: get gift
+      const gift = await this.giftRepository.findOne({
+        where: {
+          id,
+        },
+        select: [
+          'id',
+          'name',
+          'description',
+          'image',
+          'quantity',
+          'isActive',
+          'createdAt',
+          'updatedAt',
+        ],
+      });
+      return responseSuccess('update status gift successfully', 0, gift);
     } catch (error) {
       console.log(error);
       return responseError('Internal server error', -500);
     }
   }
   //step: delete gift
-  async deleteGift(id: number, req: Request) {
+  async deleteGift(id: number) {
     try {
-      //step: get admin
-      const getAdmin = req.user as IJwtPayload;
-      if (!getAdmin) return responseError('admin not found', 1012);
-      //step: check admin
-      const email = getAdmin.email as string | undefined;
-      if (!email) return responseError('admin not found', 1012);
-      const admin = await this.adminRepository.findOne({
-        where: {
-          email: email,
-        },
-      });
-      if (!admin) return responseError('admin not found', 1012);
       //step: create user gift
       const systemGift = await this.giftRepository.findOne({
         where: {
@@ -258,11 +218,8 @@ export class AdminGiftsService {
         deleteFile(systemGift.image);
       }
       //step: delete gift
-      await this.giftRepository.softRemove({
-        ...systemGift,
-        deletedBy: admin,
-      });
-      return responseSuccess('delete gift successfully', 0, systemGift);
+      await this.giftRepository.remove(systemGift);
+      return responseSuccess('delete gift successfully', 0, true);
     } catch (error) {
       console.log(error);
       return responseError('Internal server error', -500);

@@ -12,7 +12,6 @@ import {
 import { IResponse } from 'src/common/interfaces/response.interface';
 import { CreateAddUserDto } from 'src/modules/users/dtos/createUser.dto';
 import { UsersService } from 'src/modules/users/users.service';
-import { responseError } from 'src/shared/utils/response.util';
 import type { Express, Request } from 'express';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { UpdateUserDto } from 'src/modules/users/dtos/updateUserDto.dto';
@@ -29,25 +28,15 @@ export class UsersController {
     @Body() body: CreateAddUserDto,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<IResponse> {
-    try {
-      const data = await this.userService.create(body, file);
-      return data;
-    } catch (error) {
-      console.log(error);
-      return responseError('Internal server error', -500);
-    }
+    const data = await this.userService.create(body, file);
+    return data;
   }
   //step 5: get me
   @Get('me')
   @UseGuards(JwtAuthGuard)
   async me(@Req() req: Request) {
-    try {
-      const data = await this.userService.me(req);
-      return data;
-    } catch (error) {
-      console.log(error);
-      return responseError('Internal server error', -500);
-    }
+    const data = await this.userService.me(req);
+    return data;
   }
   //step 6: update me
   @Patch('me')
@@ -58,13 +47,8 @@ export class UsersController {
     @Body() body: UpdateUserDto,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<IResponse> {
-    try {
-      const data = await this.userService.updateMe(req, body, file);
-      return data;
-    } catch (error) {
-      console.log(error);
-      return responseError('Internal server error', -500);
-    }
+    const data = await this.userService.updateMe(req, body, file);
+    return data;
   }
   //step : change password
   @Patch('me/change-password')
@@ -73,12 +57,7 @@ export class UsersController {
     @Body() body: ChangePasswordDto,
     @Req() req: Request,
   ): Promise<IResponse> {
-    try {
-      const data = await this.userService.changePassword(req, body);
-      return data;
-    } catch (error) {
-      console.log(error);
-      return responseError('Internal server error', -500);
-    }
+    const data = await this.userService.changePassword(req, body);
+    return data;
   }
 }
