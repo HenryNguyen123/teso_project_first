@@ -26,7 +26,7 @@ export class UsersController {
   @UseInterceptors(UploadFileInterceptor('avatar', './public/img/avatar'))
   async create(
     @Body() body: CreateAddUserDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File | null,
   ): Promise<IResponse> {
     const data = await this.userService.create(body, file);
     return data;
@@ -45,7 +45,7 @@ export class UsersController {
   async updateMe(
     @Req() req: Request,
     @Body() body: UpdateUserDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File | null,
   ): Promise<IResponse> {
     const data = await this.userService.updateMe(req, body, file);
     return data;

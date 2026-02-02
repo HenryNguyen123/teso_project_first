@@ -27,7 +27,7 @@ export class UsersService {
     private RoleRepository: Repository<Role>,
   ) {}
   //step 1: create user
-  async create(body: CreateAddUserDto, file: Express.Multer.File) {
+  async create(body: CreateAddUserDto, file: Express.Multer.File | null) {
     try {
       const avatar = file ? avatarPath(file) : undefined;
       const password = body.password.trim();
@@ -102,7 +102,11 @@ export class UsersService {
     }
   }
   //step 6: update me
-  async updateMe(req: Request, body: UpdateUserDto, file: Express.Multer.File) {
+  async updateMe(
+    req: Request,
+    body: UpdateUserDto,
+    file: Express.Multer.File | null,
+  ) {
     try {
       const getUser = req.user as IPayloadLogin;
       if (!getUser) return responseError('User not found', 1007);
