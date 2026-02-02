@@ -128,9 +128,9 @@ export class UsersService {
           user.fullName = name;
         }
       }
-      if (body.dob || body.dob !== undefined) {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        const dob = new Date(`${body.dob}T00:00:00`);
+      if (body.dob !== undefined && body.dob !== null) {
+        const dobStr = String(body.dob);
+        const dob = new Date(`${dobStr}T00:00:00`);
         if (isNaN(dob.getTime())) {
           return responseError('Invalid dob format', 400);
         }

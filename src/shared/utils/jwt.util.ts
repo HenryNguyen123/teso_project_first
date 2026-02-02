@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
+import { IJwtPayload } from 'src/common/interfaces/jwt.interface';
 import { User } from 'src/database/entities/user.entity';
 
 interface SignJwtType {
@@ -30,10 +31,10 @@ export const signJWT = async (
 
 export const verifyJWT = async (token: string, key: string) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return await jwt.verifyAsync(token, {
+    const payload = await jwt.verifyAsync<IJwtPayload>(token, {
       secret: key,
     });
+    return payload;
   } catch (error: unknown) {
     console.log(error);
     return false;
