@@ -49,7 +49,8 @@ export class GiftsService {
         meta: {
           page,
           limit,
-          totalItems: Math.ceil(total / limit),
+          totalItems: total,
+          totalPages: Math.ceil(total / limit),
         },
       };
       return responseSuccess('get all gifts successfully', 0, payload);

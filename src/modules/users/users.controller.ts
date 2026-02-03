@@ -57,6 +57,7 @@ export class UsersController {
     @Body() body: ChangePasswordDto,
     @Req() req: Request,
   ): Promise<IResponse> {
+    console.log(body);
     const data = await this.userService.changePassword(req, body);
     return data;
   }

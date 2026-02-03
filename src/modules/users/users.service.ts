@@ -131,10 +131,8 @@ export class UsersService {
       }
       if (body.dob !== undefined && body.dob !== null) {
         const dobStr = String(body.dob);
-        const dob = new Date(`${dobStr}T00:00:00`);
-        if (isNaN(dob.getTime())) {
-          return responseError('Invalid dob format', 400);
-        }
+        const dob = new Date(dobStr);
+        if (isNaN(dob.getTime())) return responseError('Invalid dob format', 1009);
         user.dob = dob;
       }
       if (body.gender !== undefined) {
