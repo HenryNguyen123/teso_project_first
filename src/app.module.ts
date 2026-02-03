@@ -1,28 +1,26 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersController } from './modules/users/users.controller';
-import { UsersModule } from './modules/users/users.module';
-import { RoleController } from './modules/role/role.controller';
-import { RoleModule } from './modules/role/role.module';
+import { UsersController } from './users/controllers/users.controller';
+import { UsersModule } from './users/users.module';
+import { RoleController } from './role/role.controller';
+import { RoleModule } from './role/role.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from 'src/database/entities/user.entity';
-import { Role } from 'src/database/entities/role.entity';
+import { User } from 'src/users/entities/user.entity';
+import { Role } from 'src/auth/entities/role.entity';
 import 'dotenv/config';
-import { AuthModule } from 'src/modules/auth/auth.module';
-import { AuthController } from 'src/modules/auth/auth.controller';
-import { Permission } from 'src/database/entities/permission.entity';
-import { RolePermission } from 'src/database/entities/rolePermission.entity';
-import { PasswordResetToken } from 'src/database/entities/password-reset-token.entity';
-import { GiftsController } from 'src/modules/gifts/gifts.controller';
-import { AdminGiftsController } from 'src/modules/admin/gifts/gifts.controller';
-import { GiftsModule } from 'src/modules/gifts/gifts.module';
-import { AdminGiftsModule } from 'src/modules/admin/gifts/gifts.module';
-import { UserGift } from 'src/database/entities/user-gift.entity';
-import { SystemGift } from 'src/database/entities/system-gift.entity';
-import { AdminAuthController } from 'src/modules/admin/auth/auth.controller';
-import { AdminAuthModule } from 'src/modules/admin/auth/auth.module';
-import { AuthService } from 'src/modules/auth/auth.service';
+import { AuthModule } from 'src/auth/auth.module';
+import { AuthController } from 'src/auth/controllers/user/auth-user.controller';
+import { Permission } from 'src/auth/entities/permission.entity';
+import { RolePermission } from 'src/auth/entities/role-permission.entity';
+import { PasswordResetToken } from 'src/auth/entities/password-reset-token.entity';
+import { GiftsController } from 'src/gifts/controllers/user/gifts-user.controller';
+import { AdminGiftsController } from 'src/gifts/controllers/admin/gifts-admin.controller';
+import { GiftsModule } from 'src/gifts/gifts.module';
+import { UserGift } from 'src/gifts/entities/user-gift.entity';
+import { SystemGift } from 'src/gifts/entities/system-gift.entity';
+import { AdminAuthController } from 'src/auth/controllers/admin/auth.controller';
+import { AuthService } from 'src/auth/services/user/auth-user.service';
 import { JwtService } from '@nestjs/jwt';
 
 @Module({
@@ -50,7 +48,6 @@ import { JwtService } from '@nestjs/jwt';
       logging: false,
     }),
     GiftsModule,
-    AdminGiftsModule,
     TypeOrmModule.forFeature([
       User,
       Role,
@@ -60,7 +57,6 @@ import { JwtService } from '@nestjs/jwt';
       UserGift,
       SystemGift,
     ]),
-    AdminAuthModule,
   ],
   controllers: [
     AppController,

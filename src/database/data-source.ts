@@ -1,12 +1,12 @@
 import 'dotenv/config';
 import { DataSource } from 'typeorm';
-import { User } from './entities/user.entity';
-import { Role } from './entities/role.entity';
-import { Permission } from './entities/permission.entity';
-import { RolePermission } from './entities/rolePermission.entity';
-import { PasswordResetToken } from './entities/password-reset-token.entity';
-import { UserGift } from 'src/database/entities/user-gift.entity';
-import { SystemGift } from 'src/database/entities/system-gift.entity';
+import { User } from '../users/entities/user.entity';
+import { Role } from '../auth/entities/role.entity';
+import { Permission } from '../auth/entities/permission.entity';
+import { RolePermission } from '../auth/entities/role-permission.entity';
+import { PasswordResetToken } from '../auth/entities/password-reset-token.entity';
+import { UserGift } from 'src/gifts/entities/user-gift.entity';
+import { SystemGift } from 'src/gifts/entities/system-gift.entity';
 import { DataSourceOptions } from 'typeorm';
 import { SeederOptions } from 'typeorm-extension';
 

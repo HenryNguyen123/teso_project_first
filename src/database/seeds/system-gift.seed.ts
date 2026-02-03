@@ -1,6 +1,6 @@
 import { Seeder } from 'typeorm-extension';
 import { DataSource } from 'typeorm';
-import { SystemGift } from 'src/database/entities/system-gift.entity';
+import { SystemGift } from 'src/gifts/entities/system-gift.entity';
 
 export default class SystemGiftSeeder implements Seeder {
   async run(dataSource: DataSource): Promise<void> {

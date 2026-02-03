@@ -1,0 +1,117 @@
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/users/entities/user.entity';
+import { LoginDto } from 'src/auth/dtos/request/login.dto';
+import { comparePassword } from 'src/common/utils/hash-password.util';
+import { Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
+import { PasswordResetToken } from 'src/auth/entities/password-reset-token.entity';
+import {
+  IPayloadJWTLogin,
+  IPayloadLogin,
+  IPayloadResetTokenLogin,
+  IResponseLogin,
+} from 'src/auth/interfaces/login.interface';
+import { plainToInstance } from 'class-transformer';
+import { LoginResponseDto } from 'src/auth/dtos/response/login-response.dto';
+
+@Injectable()
+export class AuthService {
+  constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+    @InjectRepository(PasswordResetToken)
+    private resetTokenRepository: Repository<PasswordResetToken>,
+    private jwtService: JwtService,
+  ) {}
+  async loginService(
+    body: LoginDto,
+    roleCode: string,
+  ): Promise<IResponseLogin> {
+    const pass: string = body.password.trim();
+    const email: string = body.email.trim();
+    const keyAccess = process.env.JWT_SECRET_KEY;
+    const keyReset = process.env.JWT_RESET_KEY;
+    //step: validate input
+    if (!keyAccess) {
+      throw new BadRequestException('JWT_SECRET_KEY is not defined');
+    }
+    if (!keyReset) {
+      throw new BadRequestException('JWT_RESET_KEY is not defined');
+    }
+
+    //step: check user exist
+    const user = await this.usersRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .leftJoinAndSelect('user.role', 'role')
+      .where('user.email = :email', { email: email })
+      .getOne();
+    if (!user) {
+      throw new UnauthorizedException('account does not exist');
+    }
+    //step: check role
+    if (user.role.code !== roleCode) {
+      throw new UnauthorizedException(
+        'account does not have permission to login',
+      );
+    }
+    //step: check password
+    const isValid = await comparePassword(pass, user.password);
+    if (!isValid) {
+      throw new UnauthorizedException('Incorrect password');
+    }
+    //step: payload response
+    const payload: IPayloadLogin = {
+      email: user.email,
+      dob: user.dob,
+      fullName: user.fullName,
+      gender: user.gender,
+      avatar: user.avatar,
+      role: {
+        name: user.role.name,
+        code: user.role.code,
+      },
+    };
+    const payloadJWT: IPayloadJWTLogin = {
+      sub: user.id,
+      roleCode: user.role.code,
+      email: user.email,
+    };
+    // step: sign token
+    const accessToken = await this.jwtService.signAsync(payloadJWT, {
+      secret: keyAccess,
+      expiresIn: Number(process.env.TIME_EPIRE_TOKEN_ACCESS_LOGIN),
+    });
+    const refreshToken = await this.jwtService.signAsync(payloadJWT, {
+      secret: keyReset,
+      expiresIn: Number(process.env.TIME_EPIRE_TOKEN_REFRESH_PASSWORD),
+    });
+    //step: save reset Token
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+    const payloadResstToken: IPayloadResetTokenLogin = {
+      user: user,
+      token: refreshToken,
+      expiresAt: expiresAt,
+      isUsed: false,
+    };
+    const resetTokenEntity =
+      this.resetTokenRepository.create(payloadResstToken);
+    await this.resetTokenRepository.save(resetTokenEntity);
+    //step: output data
+    return plainToInstance(LoginResponseDto, {
+      accessToken,
+      refreshToken,
+      payload,
+    });
+  }
+  // step: login
+  async login(body: LoginDto, roleCode: string): Promise<IResponseLogin> {
+    return this.loginService(body, roleCode);
+  }
+}
