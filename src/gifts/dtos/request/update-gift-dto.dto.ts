@@ -11,11 +11,13 @@ import {
 export class UpdateGiftDto {
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value.trim())
   @MinLength(2)
   name?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value.trim())
   description?: string;
 
   @IsOptional()
