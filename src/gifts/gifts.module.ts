@@ -7,12 +7,12 @@ import { User } from 'src/users/entities/user.entity';
 import { AdminGiftsService } from './services/admin/gifts-admin.service';
 import { GiftsController } from './controllers/user/gifts-user.controller';
 import { AdminGiftsController } from './controllers/admin/gifts-admin.controller';
-import { JwtService } from '@nestjs/jwt';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SystemGift, UserGift, User])],
+  imports: [TypeOrmModule.forFeature([SystemGift, UserGift, User]), AuthModule],
   controllers: [GiftsController, AdminGiftsController],
-  exports: [TypeOrmModule, GiftsService, AdminGiftsService, JwtService],
-  providers: [GiftsService, AdminGiftsService,JwtService],
+  exports: [GiftsService, AdminGiftsService],
+  providers: [GiftsService, AdminGiftsService],
 })
 export class GiftsModule {}

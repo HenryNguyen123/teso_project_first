@@ -3,7 +3,7 @@ import { AuthService } from './services/user/auth-user.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Role } from 'src/auth/entities/role.entity';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Permission } from 'src/auth/entities/permission.entity';
 import { RolePermission } from 'src/auth/entities/role-permission.entity';
 import { PasswordResetToken } from 'src/auth/entities/password-reset-token.entity';
@@ -22,9 +22,19 @@ import { AdminAuthController } from 'src/auth/controllers/admin/auth.controller'
       RolePermission,
       PasswordResetToken,
     ]),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET_KEY,
+      signOptions: { expiresIn: '1d' },
+    }),
   ],
   controllers: [AuthController, AdminAuthController],
-  exports: [AuthService, AuthLoginGuard, AdminAuthService],
-  providers: [AuthService, JwtService, AuthLoginGuard, AdminAuthService, ConfigService],
+  exports: [AuthService, AuthLoginGuard, AdminAuthService, JwtModule],
+  providers: [
+    AuthService,
+    JwtService,
+    AuthLoginGuard,
+    AdminAuthService,
+    ConfigService,
+  ],
 })
 export class AuthModule {}

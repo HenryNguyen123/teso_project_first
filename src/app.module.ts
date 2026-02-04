@@ -15,9 +15,6 @@ import { SystemGift } from 'src/gifts/entities/system-gift.entity';
 
 @Module({
   imports: [
-    UsersModule,
-    RoleModule,
-    AuthModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
@@ -37,6 +34,9 @@ import { SystemGift } from 'src/gifts/entities/system-gift.entity';
       synchronize: true,
       logging: false,
     }),
+    UsersModule,
+    RoleModule,
+    AuthModule,
     GiftsModule,
   ],
 })

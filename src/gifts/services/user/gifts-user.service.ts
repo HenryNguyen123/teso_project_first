@@ -18,54 +18,44 @@ export class GiftsService {
   ) {}
   //step: get all gifts
   async getAllGifts(paginationDto: PaginationDto) {
-    try {
-      const { page = 1, limit = 10 } = paginationDto;
-      const [allGifts, total] = await this.giftRepository.findAndCount({
-        where: {
-          isActive: true,
-          quantity: MoreThan(0),
-        },
-        order: {
-          createdAt: 'DESC',
-        },
-        relations: {
-          userGifts: true,
-        },
-        skip: (page - 1) * limit,
-        take: limit,
-      });
-      return plainToInstance(GiftPaginationResponseDto, {
-        data: allGifts,
-        meta: {
-          page,
-          limit,
-          totalItems: total,
-          totalPages: Math.ceil(total / limit),
-        },
-      });
-    } catch (error) {
-      console.log('get all gifts error:', error);
-      throw error;
-    }
+    const { page = 1, limit = 10 } = paginationDto;
+    const [allGifts, total] = await this.giftRepository.findAndCount({
+      where: {
+        isActive: true,
+        quantity: MoreThan(0),
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+      relations: {
+        userGifts: true,
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return plainToInstance(GiftPaginationResponseDto, {
+      data: allGifts,
+      meta: {
+        page,
+        limit,
+        totalItems: total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   }
   //step: get gift by id
   async getGiftById(id: number) {
-    try {
-      const gift = await this.giftRepository.findOne({
-        where: {
-          id,
-          isActive: true,
-          quantity: MoreThan(0),
-        },
-        relations: {
-          userGifts: true,
-        },
-      });
-      if (!gift) throw new NotFoundException('gift not found');
-      return plainToInstance(GiftItemResponseDto, gift);
-    } catch (error) {
-      console.log('get gift by id error:', error);
-      throw error;
-    }
+    const gift = await this.giftRepository.findOne({
+      where: {
+        id,
+        isActive: true,
+        quantity: MoreThan(0),
+      },
+      relations: {
+        userGifts: true,
+      },
+    });
+    if (!gift) throw new NotFoundException('gift not found');
+    return plainToInstance(GiftItemResponseDto, gift);
   }
 }

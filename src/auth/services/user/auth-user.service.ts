@@ -1,6 +1,8 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
+  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -34,24 +36,24 @@ export class AuthService {
     body: LoginDto,
     roleCode: string,
   ): Promise<IResponseLogin> {
-    const pass: string = body.password.trim();
-    const email: string = body.email.trim();
+    const pass: string = body.password;
+    const email: string = body.email;
     const keyAccess = this.configService.get<string>('JWT_SECRET_KEY');
     const keyReset = this.configService.get<string>('JWT_RESET_KEY');
-    const timeExpireTokenAccessLogin = Number(this.configService.get<string | number>('TIME_EPIRE_TOKEN_ACCESS_LOGIN'));
-    const timeExpireTokenRefreshPassword = Number(this.configService.get<string | number>('TIME_EPIRE_TOKEN_REFRESH_PASSWORD'));
+    const timeExpireTokenAccessLogin = Number(
+      this.configService.get<string | number>('TIME_EPIRE_TOKEN_ACCESS_LOGIN'),
+    );
+    const timeExpireTokenRefreshPassword = Number(
+      this.configService.get<string | number>(
+        'TIME_EPIRE_TOKEN_REFRESH_PASSWORD',
+      ),
+    );
     //step: validate input
-    if (!timeExpireTokenAccessLogin) {
-      throw new BadRequestException('TIME_EPIRE_TOKEN_ACCESS_LOGIN is not defined');
+    if (!timeExpireTokenAccessLogin || !timeExpireTokenRefreshPassword) {
+      throw new InternalServerErrorException('JWT expiration config missing');
     }
-    if (!timeExpireTokenRefreshPassword) {
-      throw new BadRequestException('TIME_EPIRE_TOKEN_REFRESH_PASSWORD is not defined');
-    }
-    if (!keyAccess) {
-      throw new BadRequestException('JWT_SECRET_KEY is not defined');
-    }
-    if (!keyReset) {
-      throw new BadRequestException('JWT_RESET_KEY is not defined');
+    if (!keyAccess || !keyReset) {
+      throw new InternalServerErrorException('JWT config missing');
     }
 
     //step: check user exist
@@ -66,9 +68,7 @@ export class AuthService {
     }
     //step: check role
     if (user.role.code !== roleCode) {
-      throw new UnauthorizedException(
-        'account does not have permission to login',
-      );
+      throw new ForbiddenException('account does not have permission to login');
     }
     //step: check password
     const isValid = await comparePassword(pass, user.password);
