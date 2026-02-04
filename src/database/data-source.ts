@@ -28,12 +28,12 @@ const dataSourceOptions: DataSourceOptions & SeederOptions = {
     SystemGift,
   ],
 
-  migrations: ['dist/database/migrations/*.js'],
+  migrations: ['dist/src/database/migrations/*.js'],
   synchronize: false,
   logging: false,
 
-  seeds: ['dist/database/seeds/*.js'],
-  factories: ['dist/database/factories/*.js'],
+  seeds: ['dist/src/database/seeds/*.js'],
+  factories: ['dist/src/database/factories/*.js'],
 };
 
 export const AppDataSource = new DataSource(dataSourceOptions);

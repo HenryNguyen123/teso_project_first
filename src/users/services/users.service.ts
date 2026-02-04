@@ -157,7 +157,7 @@ export class UsersService {
       return plainToInstance(UserResponseDto, updatedUser);
     } catch (error) {
       console.log('update user error:', error);
-      throw new InternalServerErrorException('update user fail');
+      throw error;
     }
   }
   //step 7: change password
@@ -208,7 +208,7 @@ export class UsersService {
       return plainToInstance(UserResponseDto, updateUser);
     } catch (error) {
       console.log('change password error:', error);
-      throw new InternalServerErrorException('change password fail');
+      throw error;
     }
   }
 }

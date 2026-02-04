@@ -136,6 +136,7 @@ export class AdminGiftsService {
             : systemGift.quantity,
         isActive:
           body.isActive !== undefined ? body.isActive : systemGift.isActive,
+        updatedAt: new Date(),
       };
       const gift = await this.giftRepository.save({
         ...systemGift,
@@ -153,6 +154,7 @@ export class AdminGiftsService {
       //step: update gift
       const result = await this.giftRepository.update(id, {
         isActive: body.isActive,
+        updatedAt: new Date(),
       });
       if (!result.affected) throw new NotFoundException('gift not found');
       //step: get gift

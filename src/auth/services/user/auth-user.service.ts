@@ -18,6 +18,7 @@ import {
 } from 'src/auth/interfaces/login.interface';
 import { plainToInstance } from 'class-transformer';
 import { LoginResponseDto } from 'src/auth/dtos/response/login-response.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -27,6 +28,7 @@ export class AuthService {
     @InjectRepository(PasswordResetToken)
     private resetTokenRepository: Repository<PasswordResetToken>,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
   async loginService(
     body: LoginDto,
@@ -34,9 +36,17 @@ export class AuthService {
   ): Promise<IResponseLogin> {
     const pass: string = body.password.trim();
     const email: string = body.email.trim();
-    const keyAccess = process.env.JWT_SECRET_KEY;
-    const keyReset = process.env.JWT_RESET_KEY;
+    const keyAccess = this.configService.get<string>('JWT_SECRET_KEY');
+    const keyReset = this.configService.get<string>('JWT_RESET_KEY');
+    const timeExpireTokenAccessLogin = Number(this.configService.get<string | number>('TIME_EPIRE_TOKEN_ACCESS_LOGIN'));
+    const timeExpireTokenRefreshPassword = Number(this.configService.get<string | number>('TIME_EPIRE_TOKEN_REFRESH_PASSWORD'));
     //step: validate input
+    if (!timeExpireTokenAccessLogin) {
+      throw new BadRequestException('TIME_EPIRE_TOKEN_ACCESS_LOGIN is not defined');
+    }
+    if (!timeExpireTokenRefreshPassword) {
+      throw new BadRequestException('TIME_EPIRE_TOKEN_REFRESH_PASSWORD is not defined');
+    }
     if (!keyAccess) {
       throw new BadRequestException('JWT_SECRET_KEY is not defined');
     }
@@ -85,11 +95,11 @@ export class AuthService {
     // step: sign token
     const accessToken = await this.jwtService.signAsync(payloadJWT, {
       secret: keyAccess,
-      expiresIn: Number(process.env.TIME_EPIRE_TOKEN_ACCESS_LOGIN),
+      expiresIn: timeExpireTokenAccessLogin,
     });
     const refreshToken = await this.jwtService.signAsync(payloadJWT, {
       secret: keyReset,
-      expiresIn: Number(process.env.TIME_EPIRE_TOKEN_REFRESH_PASSWORD),
+      expiresIn: timeExpireTokenRefreshPassword,
     });
     //step: save reset Token
     const expiresAt = new Date();

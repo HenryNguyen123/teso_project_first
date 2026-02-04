@@ -54,6 +54,8 @@ export class GiftsService {
       const gift = await this.giftRepository.findOne({
         where: {
           id,
+          isActive: true,
+          quantity: MoreThan(0),
         },
         relations: {
           userGifts: true,

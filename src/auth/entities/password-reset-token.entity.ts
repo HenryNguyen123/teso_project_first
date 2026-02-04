@@ -22,10 +22,10 @@ export class PasswordResetToken {
   @Column({ type: 'text' })
   token: string;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamp', name: 'expires_at' })
   expiresAt: Date;
 
-  @Column({ default: false })
+  @Column({ default: false, name: 'is_used' })
   isUsed: boolean;
 
   @CreateDateColumn({ name: 'created_at' })
