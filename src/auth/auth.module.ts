@@ -10,6 +10,8 @@ import { PasswordResetToken } from 'src/auth/entities/password-reset-token.entit
 import { AuthLoginGuard } from 'src/auth/guards/auth-login.guard';
 import { AdminAuthService } from 'src/auth/services/admin/auth-admin.service';
 import { ConfigService } from '@nestjs/config';
+import { AuthController } from 'src/auth/controllers/user/auth-user.controller';
+import { AdminAuthController } from 'src/auth/controllers/admin/auth.controller';
 
 @Module({
   imports: [
@@ -21,7 +23,8 @@ import { ConfigService } from '@nestjs/config';
       PasswordResetToken,
     ]),
   ],
-  exports: [AuthService, AuthLoginGuard, AdminAuthService, ConfigService],
+  controllers: [AuthController, AdminAuthController],
+  exports: [AuthService, AuthLoginGuard, AdminAuthService],
   providers: [AuthService, JwtService, AuthLoginGuard, AdminAuthService, ConfigService],
 })
 export class AuthModule {}

@@ -5,10 +5,14 @@ import { SystemGift } from 'src/gifts/entities/system-gift.entity';
 import { UserGift } from 'src/gifts/entities/user-gift.entity';
 import { User } from 'src/users/entities/user.entity';
 import { AdminGiftsService } from './services/admin/gifts-admin.service';
+import { GiftsController } from './controllers/user/gifts-user.controller';
+import { AdminGiftsController } from './controllers/admin/gifts-admin.controller';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [TypeOrmModule.forFeature([SystemGift, UserGift, User])],
-  exports: [TypeOrmModule, GiftsService, AdminGiftsService],
-  providers: [GiftsService, AdminGiftsService],
+  controllers: [GiftsController, AdminGiftsController],
+  exports: [TypeOrmModule, GiftsService, AdminGiftsService, JwtService],
+  providers: [GiftsService, AdminGiftsService,JwtService],
 })
 export class GiftsModule {}

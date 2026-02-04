@@ -167,14 +167,8 @@ export class UsersService {
       const getUser = req.user as IPayloadLogin;
       if (!getUser) throw new NotFoundException('User not found');
       const password = body.newPassword.trim();
-      if (password.length < 6)
-        throw new BadRequestException('Password must be at least 6 characters');
       const email = getUser.email;
-      if (!emailRegex.test(email))
-        throw new BadRequestException('Invalid email format');
-      if (!body.oldPassword || !body.newPassword)
-        throw new BadRequestException('Password is required');
-      if (body.oldPassword === body.newPassword)
+      if (body.oldPassword === password)
         throw new BadRequestException(
           'New password must be different from old password',
         );
