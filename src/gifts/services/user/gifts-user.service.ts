@@ -28,31 +28,12 @@ export class GiftsService {
         order: {
           createdAt: 'DESC',
         },
-        select: [
-          'id',
-          'name',
-          'description',
-          'image',
-          'quantity',
-          'isActive',
-          'createdAt',
-          'updatedAt',
-        ],
         relations: {
           userGifts: true,
         },
         skip: (page - 1) * limit,
         take: limit,
       });
-      const payload = {
-        data: allGifts,
-        meta: {
-          page,
-          limit,
-          totalItems: total,
-          totalPages: Math.ceil(total / limit),
-        },
-      };
       return plainToInstance(GiftPaginationResponseDto, {
         data: allGifts,
         meta: {
@@ -77,16 +58,6 @@ export class GiftsService {
         relations: {
           userGifts: true,
         },
-        select: [
-          'id',
-          'name',
-          'description',
-          'image',
-          'quantity',
-          'isActive',
-          'createdAt',
-          'updatedAt',
-        ],
       });
       if (!gift) throw new NotFoundException('gift not found');
       return plainToInstance(GiftItemResponseDto, gift);

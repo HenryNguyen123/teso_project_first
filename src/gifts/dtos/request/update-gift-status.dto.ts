@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsNotEmpty } from 'class-validator';
+import { IsBoolean } from 'class-validator';
 
 export class UpdateGiftStatusDto {
   @Transform(({ value }) => value === 'true' || value === true)

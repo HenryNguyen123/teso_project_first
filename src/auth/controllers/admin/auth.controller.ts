@@ -4,7 +4,7 @@ import { RoleCode } from 'src/auth/enums/role-code.enums';
 import { AdminAuthService } from 'src/auth/services/admin/auth-admin.service';
 import { LoginResponseDto } from 'src/auth/dtos/response/login-response.dto';
 
-@Controller('admin/auth')
+@Controller('auth/admin')
 export class AdminAuthController {
   constructor(private adminAuthService: AdminAuthService) {}
   @Post('login')

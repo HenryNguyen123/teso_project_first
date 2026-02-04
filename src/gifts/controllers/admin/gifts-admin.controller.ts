@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   ParseIntPipe,
   Patch,
@@ -11,7 +12,6 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { IResponse } from 'src/common/interfaces/response.interface';
 import { AdminGiftsService } from 'src/gifts/services/admin/gifts-admin.service';
 import { RoleAdminGuard } from 'src/auth/guards/role-guard-admin.guard';
 import { UseGuards } from '@nestjs/common';
@@ -23,7 +23,7 @@ import { GiftPaginationResponseDto } from 'src/gifts/dtos/response/gift-paginati
 import { GiftItemResponseDto } from 'src/gifts/dtos/response/get-all-gifts-response.dto';
 import { UpdateGiftDto } from 'src/gifts/dtos/request/update-gift-dto.dto';
 import { PaginationDto } from 'src/gifts/dtos/response/pagination.dto';
-@Controller('admin/gifts')
+@Controller('gifts/admin')
 export class AdminGiftsController {
   constructor(private adminGriftService: AdminGiftsService) {}
   //step: get all gifts
@@ -78,10 +78,10 @@ export class AdminGiftsController {
     return gift;
   }
   //step: delete gift
+  @HttpCode(204)
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RoleAdminGuard)
-  async deleteGift(@Param('id') id: number): Promise<{ message: string }> {
-    const gift = await this.adminGriftService.deleteGift(id);
-    return gift;
+  async deleteGift(@Param('id') id: number): Promise<void> {
+    await this.adminGriftService.deleteGift(id);
   }
 }

@@ -1,8 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateAddUserDto } from 'src/users/dtos/reques/create-user.dto';
 import { User } from 'src/users/entities/user.entity';
-import { responseError, responseSuccess } from 'src/common/utils/response.util';
 import { Repository } from 'typeorm';
 import {
   comparePassword,
@@ -16,6 +20,8 @@ import { UpdateUserDto } from 'src/users/dtos/reques/update-user-dto.dto';
 import { avatarPath } from 'src/common/utils/upload-avatar.util';
 import { deleteFile } from 'src/common/utils/delete-file.util';
 import { ChangePasswordDto } from 'src/users/dtos/reques/change-password-dto.dto';
+import { plainToInstance } from 'class-transformer';
+import { UserResponseDto } from 'src/users/dtos/response/user-response.dto';
 type GenderType = 'MALE' | 'FEMALE' | 'OTHER';
 
 @Injectable()
@@ -33,20 +39,13 @@ export class UsersService {
       const password = body.password.trim();
       const email = body.email.trim();
       const userCode = 'USER';
-      //step: validate
-      if (!email || !password || !body.fullName)
-        return responseError('Missing required fields', 1000);
-      if (password.length < 6)
-        return responseError('Password must be at least 6 characters', 1001);
-      if (!emailRegex.test(email))
-        return responseError('Invalid email format', 1002);
       //step: check email exist
       const checkEmail = await this.usersRepository.findOne({
         where: {
           email,
         },
       });
-      if (checkEmail) return responseError('Email already exists', 1003);
+      if (checkEmail) throw new BadRequestException('Email already exists');
       //step: hash password
       const hash = await hashPassword(password);
       //step: check role
@@ -55,7 +54,7 @@ export class UsersService {
           code: userCode,
         },
       });
-      if (!role) return responseError('Role not found', 1004);
+      if (!role) throw new BadRequestException('Role not found');
       //step create user
       const payload = {
         email: email,
@@ -70,22 +69,22 @@ export class UsersService {
       const user = this.usersRepository.create({ ...payload, password: hash });
       const checkCreateUser = await this.usersRepository.save(user);
       if (checkCreateUser) {
-        return responseSuccess('Create user successfully', 0, payload);
+        return plainToInstance(UserResponseDto, checkCreateUser);
       }
-      return responseError('create user fail', 1005);
+      throw new InternalServerErrorException('create user fail');
     } catch (error) {
       console.log('create user error:', error);
-      return responseError('get accout user fail', 1006);
+      throw new InternalServerErrorException('get accout user fail');
     }
   }
   // step 5: get me
   async me(req: Request) {
     try {
       const getUser = req.user as IPayloadLogin;
-      if (!getUser) return responseError('User not found', 1007);
+      if (!getUser) throw new BadRequestException('User not found');
       const email = getUser.email;
       if (!emailRegex.test(email))
-        return responseError('Invalid email format', 1002);
+        throw new BadRequestException('Invalid email format');
       const user = await this.usersRepository.findOne({
         where: {
           email: email,
@@ -94,11 +93,11 @@ export class UsersService {
           role: true,
         },
       });
-      if (!user) return responseError('User not found', 1007);
-      return responseSuccess('Get user successfully', 0, user);
+      if (!user) throw new NotFoundException('User not found');
+      return plainToInstance(UserResponseDto, user);
     } catch (error) {
       console.log('get user error:', error);
-      return responseError('get user fail', 1008);
+      throw new InternalServerErrorException('get user fail');
     }
   }
   //step 6: update me
@@ -109,10 +108,10 @@ export class UsersService {
   ) {
     try {
       const getUser = req.user as IPayloadLogin;
-      if (!getUser) return responseError('User not found', 1007);
+      if (!getUser) throw new BadRequestException('User not found');
       const email = getUser.email;
       if (!emailRegex.test(email))
-        return responseError('Invalid email format', 1002);
+        throw new BadRequestException('Invalid email format');
       const user = await this.usersRepository.findOne({
         where: {
           email: email,
@@ -121,7 +120,7 @@ export class UsersService {
           role: true,
         },
       });
-      if (!user) return responseError('User not found', 1007);
+      if (!user) throw new NotFoundException('User not found');
       // step:save update user
       if (body.fullName !== undefined) {
         const name = body.fullName.trim();
@@ -133,7 +132,7 @@ export class UsersService {
         const dobStr = String(body.dob);
         const dob = new Date(dobStr);
         if (isNaN(dob.getTime()))
-          return responseError('Invalid dob format', 1009);
+          throw new BadRequestException('Invalid dob format');
         user.dob = dob;
       }
       if (body.gender !== undefined) {
@@ -155,10 +154,10 @@ export class UsersService {
           role: true,
         },
       });
-      return responseSuccess('Update user successfully', 0, updatedUser);
+      return plainToInstance(UserResponseDto, updatedUser);
     } catch (error) {
       console.log('update user error:', error);
-      return responseError('update user fail', 1008);
+      throw new InternalServerErrorException('update user fail');
     }
   }
   //step 7: change password
@@ -166,19 +165,18 @@ export class UsersService {
     try {
       //step: validate
       const getUser = req.user as IPayloadLogin;
-      if (!getUser) return responseError('User not found', 1007);
+      if (!getUser) throw new NotFoundException('User not found');
       const password = body.newPassword.trim();
       if (password.length < 6)
-        return responseError('Password must be at least 6 characters', 1001);
+        throw new BadRequestException('Password must be at least 6 characters');
       const email = getUser.email;
       if (!emailRegex.test(email))
-        return responseError('Invalid email format', 1002);
+        throw new BadRequestException('Invalid email format');
       if (!body.oldPassword || !body.newPassword)
-        return responseError('Password is required', 1003);
+        throw new BadRequestException('Password is required');
       if (body.oldPassword === body.newPassword)
-        return responseError(
+        throw new BadRequestException(
           'New password must be different from old password',
-          1011,
         );
       //step: check user
       const user = await this.usersRepository
@@ -187,14 +185,14 @@ export class UsersService {
         .leftJoinAndSelect('user.role', 'role')
         .where('user.email = :email', { email: email })
         .getOne();
-      if (!user) return responseError('User not found', 1007);
+      if (!user) throw new NotFoundException('User not found');
       //step: check old password
       const checkPassword = await comparePassword(
         body.oldPassword,
         user.password,
       );
       if (!checkPassword)
-        return responseError('Old password is incorrect', 1010);
+        throw new BadRequestException('Old password is incorrect');
       //step: hash new password
       const hash = await hashPassword(password);
       user.password = hash;
@@ -207,10 +205,10 @@ export class UsersService {
           role: true,
         },
       });
-      return responseSuccess('Change password successfully', 0, updateUser);
+      return plainToInstance(UserResponseDto, updateUser);
     } catch (error) {
       console.log('change password error:', error);
-      return responseError('change password fail', 1009);
+      throw new InternalServerErrorException('change password fail');
     }
   }
 }

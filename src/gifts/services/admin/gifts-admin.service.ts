@@ -35,32 +35,12 @@ export class AdminGiftsService {
         order: {
           createdAt: 'DESC',
         },
-        select: [
-          'id',
-          'name',
-          'description',
-          'image',
-          'quantity',
-          'isActive',
-          'createdAt',
-          'updatedAt',
-        ],
         relations: {
           userGifts: true,
         },
         take: limit,
         skip: (page - 1) * limit,
       });
-      //step: pagination
-      const payload = {
-        data: allGifts,
-        meta: {
-          page,
-          limit,
-          totalItems: total,
-          totalPages: Math.ceil(total / limit),
-        },
-      };
       return plainToInstance(GiftPaginationResponseDto, {
         data: allGifts,
         meta: {
@@ -85,16 +65,6 @@ export class AdminGiftsService {
         relations: {
           userGifts: true,
         },
-        select: [
-          'id',
-          'name',
-          'description',
-          'image',
-          'quantity',
-          'isActive',
-          'createdAt',
-          'updatedAt',
-        ],
       });
       if (!gift) throw new NotFoundException('gift not found');
       return plainToInstance(GiftItemResponseDto, gift, {
@@ -124,7 +94,6 @@ export class AdminGiftsService {
         isActive: Boolean(body.isActive),
       };
       const gift = await this.giftRepository.save(payload);
-      if (!gift) throw new BadRequestException('create gift fail');
       return plainToInstance(GiftItemResponseDto, gift);
     } catch (error) {
       console.log(error);
@@ -151,7 +120,7 @@ export class AdminGiftsService {
           id: id,
         },
       });
-      if (!systemGift) throw new BadRequestException('gift not found');
+      if (!systemGift) throw new NotFoundException('gift not found');
       //step: remove old image
       if (file && systemGift.image) {
         deleteFile(systemGift.image);
@@ -172,7 +141,6 @@ export class AdminGiftsService {
         ...systemGift,
         ...payload,
       });
-      if (!gift) throw new BadRequestException('update gift fail');
       return plainToInstance(GiftItemResponseDto, gift);
     } catch (error) {
       console.log(error);
@@ -225,7 +193,6 @@ export class AdminGiftsService {
       }
       //step: delete gift
       await this.giftRepository.remove(systemGift);
-      return { message: 'Gift deleted successfully' };
     } catch (error) {
       console.log(error);
       throw error;
