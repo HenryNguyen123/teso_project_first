@@ -1,6 +1,7 @@
 import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
+  IsNumber,
   IsOptional,
   IsString,
   Min,
@@ -18,8 +19,9 @@ export class UpdateGiftDto {
   description?: string;
 
   @IsOptional()
-  @Min(0)
   @Type(() => Number)
+  @IsNumber()
+  @Min(0)
   quantity?: number;
 
   @IsOptional()

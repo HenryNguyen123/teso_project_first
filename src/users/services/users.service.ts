@@ -106,17 +106,13 @@ export class UsersService {
     });
     if (!user) throw new NotFoundException('User not found');
     // step:save update user
+    const name = body.fullName;
     if (body.fullName !== undefined) {
-      const name = body.fullName.trim();
-      if (name.length > 0) {
-        user.fullName = name;
-      }
+      user.fullName = name;
     }
     if (body.dob !== undefined && body.dob !== null) {
       const dobStr = String(body.dob);
       const dob = new Date(dobStr);
-      if (isNaN(dob.getTime()))
-        throw new BadRequestException('Invalid dob format');
       user.dob = dob;
     }
     if (body.gender !== undefined) {

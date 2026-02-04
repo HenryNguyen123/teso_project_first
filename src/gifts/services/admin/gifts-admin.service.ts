@@ -68,18 +68,15 @@ export class AdminGiftsService {
   //step: create gift
   async createGift(body: CreateGiftDto, file: Express.Multer.File) {
     let image: string | undefined;
-    const quantity = Number(body.quantity ?? 0);
-    //step: validate
-    if (quantity < 0) throw new BadRequestException('Quantity must be >= 0');
     if (file) {
       image = `/img/gifts/${file.filename}`;
     }
     //step: create gift
     const payload = {
-      name: body.name.trim(),
+      name: body.name,
       description: body.description,
       image: image,
-      quantity: quantity,
+      quantity: body.quantity,
       isActive: Boolean(body.isActive),
     };
     const gift = await this.giftRepository.save(payload);
@@ -92,9 +89,6 @@ export class AdminGiftsService {
     file: Express.Multer.File,
   ) {
     let image: string | undefined;
-    //step: validate
-    if (body.quantity !== undefined && Number(body.quantity) < 0)
-      throw new BadRequestException('Quantity must be >= 0');
     if (file) {
       image = `/img/gifts/${file.filename}`;
     }
@@ -114,12 +108,8 @@ export class AdminGiftsService {
       name: body.name ?? systemGift.name,
       description: body.description ?? systemGift.description,
       image: image ?? systemGift.image,
-      quantity:
-        body.quantity !== undefined
-          ? Number(body.quantity)
-          : systemGift.quantity,
-      isActive:
-        body.isActive !== undefined ? body.isActive : systemGift.isActive,
+      quantity: body.quantity ?? systemGift.quantity,
+      isActive: body.isActive ?? systemGift.isActive,
       updatedAt: new Date(),
     };
     const gift = await this.giftRepository.save({

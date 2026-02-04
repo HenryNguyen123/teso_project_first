@@ -2,6 +2,7 @@ import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   Min,
@@ -11,16 +12,19 @@ import {
 export class CreateGiftDto {
   @IsString()
   @MinLength(2)
+  @Transform(({ value }) => value.trim())
   @IsNotEmpty()
   name: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value.trim())
   description?: string;
 
   @IsOptional()
-  @Min(0)
   @Type(() => Number)
+  @IsNumber()
+  @Min(0)
   quantity?: number;
 
   @IsOptional()
